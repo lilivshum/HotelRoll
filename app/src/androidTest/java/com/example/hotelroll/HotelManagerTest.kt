@@ -158,7 +158,7 @@ class HotelManagerTest {
     }
 
     // this test case fails but it usually wouldn't occur, reservation is sert first and the check is
-    // in the reservation 
+    // in the reservation
     @Test(expected = IllegalArgumentException::class)
     fun createStayFailsWhenCheckoutBeforeCheckin() {
         manager.createStay(
