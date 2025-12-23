@@ -1,11 +1,11 @@
 package com.example.hotelroll.data.model
+import java.time.LocalDate
 
 data class Reservation(
     val id: Long = 0L,
     val resName: String,
-    val roomNumber: String,
-    val checkInDate: Long,
-    val checkOutDate: Long,
+    val checkInDate: LocalDate,
+    val nights: Int,
     val noGuests: Int,
     val notes: String? = null
 )
