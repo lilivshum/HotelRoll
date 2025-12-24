@@ -1,8 +1,12 @@
 package com.example.hotelroll.data.model
 
-enum class RoomStatus { AVAILABLE, OCCUPIED }
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "rooms")
 
 data class Room(
+    @PrimaryKey(autoGenerate = true)
     val roomId: Long = 0L,
     val roomNumber: String,
     val capacity: Int

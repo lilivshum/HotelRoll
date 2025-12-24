@@ -8,9 +8,11 @@ import com.example.hotelroll.data.dao.ReservationDao
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.dao.StayDao
+import com.example.hotelroll.data.model.Room
+import com.example.hotelroll.data.dao.RoomDao
 
 @Database(
-    entities = [Reservation::class, Stay::class],
+    entities = [Reservation::class, Stay::class, Room::class],
     version = 1
 )
 
@@ -19,5 +21,6 @@ import com.example.hotelroll.data.dao.StayDao
 abstract class HotelDatabase : RoomDatabase(){
     abstract fun reservationDao(): ReservationDao
     abstract fun stayDao(): StayDao
+    abstract fun RoomDao(): RoomDao
 }
 

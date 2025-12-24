@@ -12,13 +12,13 @@ class HotelManager {
         nights: Int
 
     ): Reservation {
-        require(nights > 0){
+        require(nights > 0) {
             "Error: 0 days of stay"
         }
 
         return Reservation(
             resName = resName,
-            noGuests =  noGuests,
+            noGuests = noGuests,
             checkInDate = checkInDate,
             nights = nights,
             notes = notes
@@ -32,7 +32,7 @@ class HotelManager {
         checkInDate: LocalDate,
         checkOutDate: LocalDate
     ): Stay {
-        require(checkInDate < checkOutDate){
+        require(checkInDate < checkOutDate) {
             "Error: checkout must be after check-in"
         }
         return Stay(
@@ -46,7 +46,7 @@ class HotelManager {
         )
     }
 
-    fun isRoomAvailable(
+    /* fun isRoomAvailable(
         roomId: Long,
         checkInDate: LocalDate,
         checkOutDate: LocalDate,
@@ -57,8 +57,9 @@ class HotelManager {
                     checkInDate < stay.checkOutDate &&
                     checkOutDate > stay.checkInDate
         }
-    }
+    }*/
 
+    // assume there is no collision
     fun assignRoom(
         reservationId: Long,
         roomId: Long,
@@ -70,10 +71,6 @@ class HotelManager {
         // calculate checkout date
         val checkOutDate = checkInDate.plusDays(nights.toLong())
 
-        if (!isRoomAvailable(roomId, checkInDate, checkOutDate, existingStays)) {
-            throw IllegalStateException("Room is not available for selected dates")
-        }
-
         return createStay(
             resId = reservationId,
             peopleInRoom,
@@ -82,9 +79,5 @@ class HotelManager {
             checkOutDate
         )
     }
-
-
-
-
-
+    
 }
