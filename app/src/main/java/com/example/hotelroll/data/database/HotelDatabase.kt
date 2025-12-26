@@ -29,7 +29,7 @@ import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 
 @TypeConverters(Converters::class)
 
-// for database initialization
+// for database initialization and default room creation
 class DatabaseCallback(
     private val context: Context
 ) : RoomDatabase.Callback() {

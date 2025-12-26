@@ -9,6 +9,8 @@ import com.example.hotelroll.domain.HotelManager
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.dao.RoomDao
+import com.example.hotelroll.data.model.RoomStatus
+import com.example.hotelroll.data.model.StayStatus
 import java.time.LocalDate
 
 class HotelRepository(
@@ -129,5 +131,34 @@ class HotelRepository(
     ): List<Stay> {
         return stayDao.getOverlapping(roomId, from, to)
     }
+
+    // some functionality functions
+
+    // requires stay Id to exist and be a legal stay Id
+    suspend fun confirmStay(
+        stayId: Long
+    ) {
+        val stay = stayDao.getById(stayId) // check added just in case for good practice
+            ?: throw IllegalStateException("Stay not found")
+
+        stayDao.updateStatus(stay.stayId, StayStatus.CONFIRMED)
+
+    }
+
+    // seems useful for like a clicking mechanism where it changes the room availability
+    suspend fun switchRoomAvailability(
+        roomId: Long
+    ){
+        val room = roomDao.getById(roomId)
+            ?: throw IllegalStateException("Room not found")
+
+        if(room.status == RoomStatus.AVAILABLE){
+            roomDao.updateStatus(room.roomId, RoomStatus.UNAVAILABLE)
+        } else {
+            roomDao.updateStatus(room.roomId, RoomStatus.AVAILABLE)
+        }
+
+    }
+
 }
 

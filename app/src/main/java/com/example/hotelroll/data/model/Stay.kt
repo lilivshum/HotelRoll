@@ -19,11 +19,14 @@ import androidx.room.PrimaryKey
 )
 
 data class Stay(
+
     @PrimaryKey(autoGenerate = true)
     val stayId: Long = 0L,
     val reservationId: Long,
     val roomId: Long,
     val peopleInRoom: Int,
     val checkInDate: LocalDate,
-    val checkOutDate: LocalDate
+    val checkOutDate: LocalDate,
+    val status: StayStatus = StayStatus.PENDING
+
 )
