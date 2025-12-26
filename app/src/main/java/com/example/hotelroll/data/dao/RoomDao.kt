@@ -5,24 +5,31 @@ import androidx.room.Insert
 import androidx.room.Update
 import androidx.room.Query
 import androidx.room.Dao
+import androidx.room.OnConflictStrategy
 
 import com.example.hotelroll.data.model.Room
 
 @Dao
 interface RoomDao {
     @Insert
-    fun insert(room: Room)
+    suspend fun insert(room: Room)
 
     @Update
-    fun update(room: Room)
+    suspend fun update(room: Room)
 
     @Delete
-    fun delete(room: Room)
+    suspend fun delete(room: Room)
 
     @Query("SELECT * FROM rooms")
-    fun getAll(): List<Room>
+    suspend fun getAll(): List<Room>
 
     @Query("SELECT * FROM rooms WHERE roomId = :id")
-    fun getById(id: Long): Room?
+    suspend fun getById(id: Long): Room?
+
+    @Query("SELECT EXISTS(SELECT 1 FROM rooms WHERE roomId = :roomId)")
+    suspend fun exists(roomId: Long): Boolean
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAll(rooms: List<Room>)
 
 }

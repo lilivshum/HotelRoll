@@ -35,6 +35,10 @@ class HotelManager {
         require(checkInDate < checkOutDate) {
             "Error: checkout must be after check-in"
         }
+
+        require(peopleInRoom > 0){
+            "Error: invalid amount of guests"
+        }
         return Stay(
 
             reservationId = resId,
@@ -46,38 +50,5 @@ class HotelManager {
         )
     }
 
-    /* fun isRoomAvailable(
-        roomId: Long,
-        checkInDate: LocalDate,
-        checkOutDate: LocalDate,
-        existingStays: List<Stay>
-    ): Boolean {
-        return existingStays.none { stay ->
-            stay.roomId == roomId &&
-                    checkInDate < stay.checkOutDate &&
-                    checkOutDate > stay.checkInDate
-        }
-    }*/
 
-    // assume there is no collision
-    fun assignRoom(
-        reservationId: Long,
-        roomId: Long,
-        peopleInRoom: Int,
-        checkInDate: LocalDate,
-        nights: Int,
-        existingStays: List<Stay>
-    ): Stay {
-        // calculate checkout date
-        val checkOutDate = checkInDate.plusDays(nights.toLong())
-
-        return createStay(
-            resId = reservationId,
-            peopleInRoom,
-            roomId,
-            checkInDate,
-            checkOutDate
-        )
-    }
-    
 }

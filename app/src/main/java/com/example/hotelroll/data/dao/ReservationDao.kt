@@ -13,18 +13,18 @@ import java.time.LocalDate
 interface ReservationDao {
 
     @Insert(onConflict = OnConflictStrategy.Companion.ABORT)
-    fun insert(reservation: Reservation)
+    suspend fun insert(reservation: Reservation): Long
 
     @Update
-    fun update(reservation: Reservation)
+    suspend fun update(reservation: Reservation)
 
     @Delete
-    fun delete(reservation: Reservation)
+    suspend fun delete(reservation: Reservation)
 
     @Query("""
         SELECT * FROM reservations
         WHERE id = :id
     """)
-    fun getById(id: Long): Reservation?
+    suspend fun getById(id: Long): Reservation?
 
 }
