@@ -12,6 +12,7 @@ import com.example.hotelroll.data.dao.RoomDao
 import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import java.time.LocalDate
+import com.example.hotelroll.data.dto.RollItem
 
 class HotelRepository(
     private val db: HotelDatabase,
@@ -158,6 +159,10 @@ class HotelRepository(
             roomDao.updateStatus(room.roomId, RoomStatus.AVAILABLE)
         }
 
+    }
+
+    suspend fun getRoomRoll(date: LocalDate): List<RollItem>{
+        return roomDao.getRoll(date = date)
     }
 
 }

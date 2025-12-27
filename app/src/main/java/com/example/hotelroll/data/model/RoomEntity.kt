@@ -7,11 +7,11 @@ import androidx.room.Index
 
 @Entity(
     tableName = "rooms",
-    indices = [Index(value = ["number"], unique = true)])
+    indices = [Index(value = ["roomNumber"], unique = true)])
 
-data class Room(
+data class RoomEntity(
     @PrimaryKey(autoGenerate = true)
-    val roomId: Long,
+    val roomId: Long = 0L,
     val roomNumber: String,
     val capacity: Int,
     val status: RoomStatus = RoomStatus.AVAILABLE
