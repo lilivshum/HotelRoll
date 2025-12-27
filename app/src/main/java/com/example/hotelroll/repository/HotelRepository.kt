@@ -46,7 +46,8 @@ class HotelRepository(
         roomId: Long,
         peopleInRoom: Int,
         checkInDate: LocalDate,
-        nights: Int
+        nights: Int,
+        tariff: Double?
     ): Long {
 
         // checks if nights amount is valid (checkOutDate Validation)
@@ -78,12 +79,17 @@ class HotelRepository(
             throw IllegalStateException("Room not available")
         }
 
+        // ensures default tariff is used
+        val finalTariff = tariff ?: room.tariff
+
         val stay = manager.createStay(
             reservationId,
             peopleInRoom = peopleInRoom,
             roomId = roomId,
             checkInDate = checkInDate,
-            checkOutDate = checkOutDate
+            checkOutDate = checkOutDate,
+            tariff = finalTariff
+
         )
 
         return stayDao.insert(stay)
@@ -97,7 +103,8 @@ class HotelRepository(
         checkInDate: LocalDate,
         nights: Int,
         roomId: Long,
-        peopleInRoom: Int
+        peopleInRoom: Int,
+        tariff: Double?
     ) {
         db.withTransaction {
             val resId = createReservation(
@@ -112,7 +119,8 @@ class HotelRepository(
                 roomId,
                 peopleInRoom,
                 checkInDate,
-                nights
+                nights,
+                tariff
             )
         }
     }

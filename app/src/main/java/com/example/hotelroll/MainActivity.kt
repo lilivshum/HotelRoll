@@ -5,12 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.viewModels
-import com.example.hotelroll.ui.roll.RoomScreen
+import com.example.hotelroll.ui.roll.RollScreen
 import com.example.hotelroll.ui.theme.HotelRollTheme
-import com.example.hotelroll.ui.room.RollViewModel
-import com.example.hotelroll.ui.room.RollViewModelFactory
+import com.example.hotelroll.ui.roll.RollViewModel
+import com.example.hotelroll.ui.roll.RollViewModelFactory
 
 class MainActivity : ComponentActivity() {
 
@@ -25,7 +24,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    RoomScreen(viewModel = viewModel)
+                    RollScreen(viewModel = viewModel)
                 }
             }
         }

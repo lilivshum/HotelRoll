@@ -5,5 +5,6 @@ class RollItem (
     val roomId: Long,
     val roomNumber: String,
     val reservationName: String?,
-    val peopleInRoom: Int?
+    val peopleInRoom: Int?,
+    val tariff: Double?
 )

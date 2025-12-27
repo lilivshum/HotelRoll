@@ -1,4 +1,4 @@
-package com.example.hotelroll.ui.room
+package com.example.hotelroll.ui.roll
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,11 +1,11 @@
-package com.example.hotelroll.ui.room
+package com.example.hotelroll.ui.roll
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.data.database.HotelDatabase
 import com.example.hotelroll.domain.HotelManager
+import com.example.hotelroll.repository.HotelRepository
 
 class RollViewModelFactory(
     private val context: Context
@@ -14,7 +14,7 @@ class RollViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RollViewModel::class.java)) {
 
-            val db = HotelDatabase.getInstance(context)
+            val db = HotelDatabase.Companion.getInstance(context)
 
             val manager = HotelManager()
 

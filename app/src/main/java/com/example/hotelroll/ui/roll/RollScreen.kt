@@ -1,43 +1,38 @@
 package com.example.hotelroll.ui.roll
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-
-import com.example.hotelroll.ui.room.RollViewModel
+import com.example.hotelroll.ui.roll.DateHeader
 
 @Composable
-fun RoomScreen(
-    viewModel: RollViewModel = viewModel()
-) {
-    val roomRoll by viewModel.roll.collectAsState()
-    val selectedDate by viewModel.date.collectAsState()
+fun RollScreen(viewModel: RollViewModel) {
+    // Collect the list of RollItems from the ViewModel
+    val rollItems by viewModel.roll.collectAsState(initial = emptyList())
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        DateHeader(
-            date = selectedDate,
-            onPrevious = viewModel::prevDay,
-            onNext = viewModel::nextDay
-        )
+    // Scaffold is optional, but useful for padding/top bars
+    Scaffold { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
+            // Date navigation header
+            DateHeader(
+                date = viewModel.date.collectAsState().value,
+                onPrevious = viewModel::prevDay,
+                onNext = viewModel::nextDay
+            )
 
-        HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(
-                items = roomRoll,
-                key = { it.roomId }   // IMPORTANT for stable scrolling
-            ) { item ->
-                RoomRollRow(item)
-            }
+            rollItems.forEach { println(it) }
+
+            // Table with horizontal scroll + vertical scrolling inside
+            RollTable(rollItems = rollItems)
         }
     }
 }

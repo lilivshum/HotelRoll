@@ -30,7 +30,8 @@ class HotelManager {
         peopleInRoom: Int,
         roomId: Long,
         checkInDate: LocalDate,
-        checkOutDate: LocalDate
+        checkOutDate: LocalDate,
+        tariff: Double
     ): Stay {
         require(checkInDate < checkOutDate) {
             "Error: checkout must be after check-in"
@@ -45,7 +46,8 @@ class HotelManager {
             roomId = roomId,
             peopleInRoom = peopleInRoom,
             checkInDate = checkInDate,
-            checkOutDate = checkOutDate
+            checkOutDate = checkOutDate,
+            tariff = tariff
 
         )
     }

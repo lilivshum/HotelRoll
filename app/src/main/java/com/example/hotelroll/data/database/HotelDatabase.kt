@@ -21,7 +21,7 @@ import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 
 @Database(
     entities = [Reservation::class, Stay::class, RoomEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 
@@ -48,6 +48,7 @@ abstract class HotelDatabase : RoomDatabase() {
                     HotelDatabase::class.java,
                     "hotel.db"
                 )
+                    .fallbackToDestructiveMigration()
                     .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                     .also { INSTANCE = it }

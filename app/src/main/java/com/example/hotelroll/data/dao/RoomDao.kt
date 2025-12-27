@@ -50,7 +50,8 @@ interface RoomDao {
         SELECT r.roomId AS roomId,
                r.roomNumber AS roomNumber,
                res.resName AS reservationName,
-               s.peopleInRoom AS peopleInRoom
+               s.peopleInRoom AS peopleInRoom, 
+               COALESCE(s.tariff, r.tariff) AS tariff
         FROM rooms r
         LEFT JOIN stays s ON s.roomId = r.roomId
             AND :date >= s.checkInDate

@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.hotelroll.data.seed.DEFAULT_ROOMS
+import android.util.Log
 
 class DatabaseCallback(
     private val context: Context
@@ -14,6 +15,7 @@ class DatabaseCallback(
 
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
+        Log.d("DB_INIT", "Database onCreate() called")
 
         CoroutineScope(Dispatchers.IO).launch {
             val db = HotelDatabase.getInstance(context)
