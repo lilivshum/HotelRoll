@@ -3,33 +3,36 @@ package com.example.hotelroll
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.viewModels
+import com.example.hotelroll.ui.roll.RoomScreen
 import com.example.hotelroll.ui.theme.HotelRollTheme
+import com.example.hotelroll.ui.room.RollViewModel
+import com.example.hotelroll.ui.room.RollViewModelFactory
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: RollViewModel by viewModels{
+        RollViewModelFactory(applicationContext)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
             HotelRollTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    RoomScreen(viewModel = viewModel)
                 }
             }
         }
     }
 }
 
+/*
 @Composable
 fun HomeScreen(name: String, modifier: Modifier = Modifier) {
     Text(
@@ -44,4 +47,4 @@ fun HomeScreenPreview() {
     HotelRollTheme {
         HomeScreen("Android")
     }
-}
+}*/
