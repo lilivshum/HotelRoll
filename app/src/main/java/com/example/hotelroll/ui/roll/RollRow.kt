@@ -29,7 +29,7 @@ fun RollRow(
         )
 
         Text(
-            text = item.reservationName ?: "— Empty —",
+            text = item.reservationName ?: "",
             modifier = Modifier.weight(RollColumns.NAME),
             style = MaterialTheme.typography.bodyMedium
         )

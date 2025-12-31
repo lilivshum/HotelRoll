@@ -82,7 +82,7 @@ class HotelRepository(
         }
 
         // ensures default tariff is used
-        val finalTariff = tariff ?: room.tariff
+        val finalTariff = tariff ?: 60.0// add different way for adding tariffs
 
         val stay = manager.createStay(
             reservationId,

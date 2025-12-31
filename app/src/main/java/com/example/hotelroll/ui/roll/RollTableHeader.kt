@@ -24,12 +24,13 @@ fun RollTableHeader() {
             text = "Room",
             modifier = Modifier.weight(RollColumns.ROOM),
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.bodyMedium
+            textAlign = TextAlign.Center
         )
         Text(
             text = "Reservation",
             modifier = Modifier.weight(RollColumns.NAME),
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
         )
         Text(
             text = "Pax",
