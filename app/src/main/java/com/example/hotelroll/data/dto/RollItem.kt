@@ -4,6 +4,7 @@ package com.example.hotelroll.data.dto
 class RollItem (
     val roomId: Long,
     val roomNumber: String,
+    val stayId: Long?, // only used for convenience to access reservation information
     val reservationName: String?,
     val peopleInRoom: Int?,
     val tariff: Double?

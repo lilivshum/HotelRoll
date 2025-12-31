@@ -19,7 +19,7 @@ import com.example.hotelroll.data.dto.RollItem
 
 
 @Composable
-fun RollTable(rollItems: List<RollItem>) {
+fun RollTable(rollItems: List<RollItem>, onStayClick: (Long) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,7 +33,7 @@ fun RollTable(rollItems: List<RollItem>) {
             modifier = Modifier.fillMaxSize()
         ) {
             items(rollItems) { item ->
-                RollRow(item)
+                RollRow(item, onStayClick)
             }
         }
     }

@@ -9,11 +9,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.ui.roll.DateHeader
 
 @Composable
-fun RollScreen(viewModel: RollViewModel) {
+fun RollScreen(onStayClick: (Long) -> Unit,
+               app: HotelApplication = LocalContext.current.applicationContext as HotelApplication
+) {
+    val viewModel: RollViewModel = viewModel(
+        factory = RollViewModelFactory(app.repository)
+    )
     // Collect the list of RollItems from the ViewModel
     val rollItems by viewModel.roll.collectAsState(initial = emptyList())
 
@@ -32,7 +40,7 @@ fun RollScreen(viewModel: RollViewModel) {
             rollItems.forEach { println(it) }
 
             // Table with horizontal scroll + vertical scrolling inside
-            RollTable(rollItems = rollItems)
+            RollTable(rollItems = rollItems, onStayClick)
         }
     }
 }

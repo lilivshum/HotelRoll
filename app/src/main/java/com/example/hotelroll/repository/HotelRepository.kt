@@ -13,6 +13,7 @@ import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import java.time.LocalDate
 import com.example.hotelroll.data.dto.RollItem
+import kotlinx.coroutines.flow.Flow
 
 class HotelRepository(
     private val db: HotelDatabase,
@@ -173,6 +174,10 @@ class HotelRepository(
 
     suspend fun getRoomRoll(date: LocalDate): List<RollItem>{
         return roomDao.getRoll(date = date)
+    }
+
+    suspend fun getStayById(id: Long): Stay? {
+        return stayDao.getById(id)
     }
 
 }
