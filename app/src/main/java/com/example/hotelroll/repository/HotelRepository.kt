@@ -43,7 +43,7 @@ class HotelRepository(
     /** Assign a room if available */
     suspend fun assignRoom(
         reservationId: Long,
-        roomId: Long,
+        roomNumber: String,
         peopleInRoom: Int,
         checkInDate: LocalDate,
         nights: Int,
@@ -61,17 +61,19 @@ class HotelRepository(
         val checkOutDate = checkInDate.plusDays(nights.toLong())
 
         // checks if room exists & capacity is allowed
-        val room = roomDao.getById(roomId)
-            ?: throw IllegalStateException("Room not found")
+        val room = roomDao.getByRoomNumber(roomNumber)
+            ?: throw IllegalStateException("Room $roomNumber not found")
 
         // although this I can change, sometimes room capacity changes are not met
-        if(peopleInRoom > room.capacity){
-            throw IllegalStateException("Room capacity exceeded")
-        }
+        // lets not add this for now
+
+//        if(peopleInRoom > room.capacity){
+//            throw IllegalStateException("Room capacity exceeded")
+//        }
 
         //checks if room is available
         val overlaps = stayDao.getOverlapping(
-            roomId,
+            room.roomId,
             checkInDate,
             checkOutDate
         )
@@ -85,7 +87,7 @@ class HotelRepository(
         val stay = manager.createStay(
             reservationId,
             peopleInRoom = peopleInRoom,
-            roomId = roomId,
+            roomId = room.roomId,
             checkInDate = checkInDate,
             checkOutDate = checkOutDate,
             tariff = finalTariff
@@ -102,7 +104,7 @@ class HotelRepository(
         notes: String?,
         checkInDate: LocalDate,
         nights: Int,
-        roomId: Long,
+        roomNumber: String,
         peopleInRoom: Int,
         tariff: Double?
     ) {
@@ -116,7 +118,7 @@ class HotelRepository(
             )
             assignRoom(
                 resId,
-                roomId,
+                roomNumber,
                 peopleInRoom,
                 checkInDate,
                 nights,

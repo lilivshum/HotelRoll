@@ -61,5 +61,6 @@ interface RoomDao {
     """)
     suspend fun getRoll(date: LocalDate): List<RollItem>
 
-
+    @Query("SELECT * FROM rooms WHERE roomNumber = :roomNumber LIMIT 1")
+    suspend fun getByRoomNumber(roomNumber: String): RoomEntity?
 }
