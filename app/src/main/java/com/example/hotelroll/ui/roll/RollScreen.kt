@@ -16,7 +16,7 @@ import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.ui.roll.DateHeader
 
 @Composable
-fun RollScreen(onStayClick: (Long) -> Unit,
+fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                app: HotelApplication = LocalContext.current.applicationContext as HotelApplication
 ) {
     val viewModel: RollViewModel = viewModel(

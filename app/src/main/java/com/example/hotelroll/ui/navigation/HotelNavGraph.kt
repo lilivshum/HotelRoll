@@ -24,22 +24,32 @@ fun HotelNavGraph(
     ) {
         composable("roll") {
             RollScreen(
-                onStayClick = { stayId ->
-                    navController.navigate("stay/$stayId")
+                onStayClick = { stayId, roomNumber, reservationName->
+                    navController.navigate("stay/$stayId/$roomNumber/$reservationName")
                 }
             )
         }
 
         composable(
-            route = "stay/{stayId}",
+            route = "stay/{stayId}/{roomNumber}/{reservationName}",
             arguments = listOf(
                 navArgument("stayId") {
                     type = NavType.LongType
+                },
+                navArgument("roomNumber") {
+                    type = NavType.StringType
+                },
+                navArgument("reservationName") {
+                    type = NavType.StringType
                 }
             )
         ) { backStackEntry ->
             StayDetailScreen(
-                stayId = backStackEntry.arguments!!.getLong("stayId")
+                stayId = backStackEntry.arguments!!.getLong("stayId"),
+                    onBack = { navController.popBackStack()},
+                roomNumber = backStackEntry.arguments!!.getString("roomNumber") ?: "Room",
+                reservationName = backStackEntry.arguments!!.getString("reservationName") ?:
+                ""
             )
         }
     }

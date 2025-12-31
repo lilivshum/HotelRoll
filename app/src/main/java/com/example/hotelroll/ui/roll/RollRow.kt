@@ -19,14 +19,14 @@ import com.example.hotelroll.ui.roll.RollColumns
 @Composable
 fun RollRow(
     item: RollItem,
-    onStayClick: (Long) -> Unit
+    onStayClick: (Long, String, String) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .clickable {
-                item.stayId?.let {onStayClick(it)}
+                item.stayId?.let {onStayClick(it, item.roomNumber, item.reservationName?:"")}
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
