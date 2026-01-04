@@ -8,6 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 
 
 @Composable
@@ -21,7 +24,7 @@ fun StayDetailsInfoRow(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge
         )
         Text(
             text = value,
@@ -30,3 +33,19 @@ fun StayDetailsInfoRow(
         )
     }
 }
+
+@Composable
+fun StayNotesSection(notes: String?) {
+    TextField(
+        value = notes ?: "",
+        onValueChange = {},          // no-op (read-only)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        label = { Text("Notes") },
+        readOnly = true,
+        singleLine = false,
+        minLines = 3
+    )
+}
+

@@ -27,4 +27,7 @@ interface ReservationDao {
     """)
     suspend fun getById(id: Long): Reservation?
 
+    @Query("SELECT * FROM reservations ORDER BY checkInDate ASC")
+    suspend fun getAllReservationsSnapshot(): List<Reservation>
+
 }

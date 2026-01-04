@@ -17,7 +17,8 @@ import com.example.hotelroll.ui.roll.DateHeader
 
 @Composable
 fun RollScreen(onStayClick: (Long, String, String) -> Unit,
-               app: HotelApplication = LocalContext.current.applicationContext as HotelApplication
+               app: HotelApplication = LocalContext.current.applicationContext as HotelApplication,
+               onMenuClick: () -> Unit
 ) {
     val viewModel: RollViewModel = viewModel(
         factory = RollViewModelFactory(app.repository)
@@ -32,7 +33,8 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
             DateHeader(
                 date = viewModel.date.collectAsState().value,
                 onPrevious = viewModel::prevDay,
-                onNext = viewModel::nextDay
+                onNext = viewModel::nextDay,
+                onMenuClick = onMenuClick
             )
 
             Spacer(modifier = Modifier.height(8.dp))

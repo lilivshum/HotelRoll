@@ -12,10 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import androidx.compose.material3.*
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.material.icons.Icons
-import com.example.hotelroll.data.model.Stay
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.dp
 
 
 
@@ -58,6 +57,7 @@ fun StayDetailScreen(
                 reservationName
             )
         }
+
     }
 }
 

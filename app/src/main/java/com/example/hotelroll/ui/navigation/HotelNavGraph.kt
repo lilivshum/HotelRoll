@@ -13,7 +13,8 @@ import com.example.hotelroll.ui.stay.StayDetailScreen
 
 @Composable
 fun HotelNavGraph(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onMenuClick: () -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -26,7 +27,8 @@ fun HotelNavGraph(
             RollScreen(
                 onStayClick = { stayId, roomNumber, reservationName->
                     navController.navigate("stay/$stayId/$roomNumber/$reservationName")
-                }
+                },
+                onMenuClick = onMenuClick
             )
         }
 

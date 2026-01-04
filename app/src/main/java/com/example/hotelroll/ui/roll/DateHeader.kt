@@ -15,12 +15,15 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Add
 
 @Composable
 fun DateHeader(
     date: LocalDate,
     onPrevious: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onMenuClick: () ->Unit
 ) {
     Row(
         modifier = Modifier
@@ -29,6 +32,16 @@ fun DateHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        IconButton(
+            onClick = onMenuClick,
+            modifier = Modifier.size(40.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Menu,
+                contentDescription = "Menu"
+            )
+        }
+
         IconButton(onClick = onPrevious) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous day")
         }
@@ -42,6 +55,13 @@ fun DateHeader(
 
         IconButton(onClick = onNext) {
             Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next day")
+        }
+
+        IconButton(
+            onClick = onMenuClick,
+            modifier = Modifier.size(40.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Reservation")
         }
     }
 }

@@ -180,5 +180,9 @@ class HotelRepository(
         return stayDao.getById(id)
     }
 
+    suspend fun getAllReservationsSnapshot(): List<Reservation> {
+        return reservationDao.getAllReservationsSnapshot()
+    }
+
 }
 
