@@ -28,6 +28,9 @@ data class Stay(
     val checkInDate: LocalDate,
     val checkOutDate: LocalDate,
     val status: StayStatus = StayStatus.PENDING,// pending whether guests have confirmed / arrived
-    val tariff: Double
+    val tariff: Double,
+    val notes: String? = null
 
 )
+
+

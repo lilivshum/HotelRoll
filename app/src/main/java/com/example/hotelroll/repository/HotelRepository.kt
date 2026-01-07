@@ -14,6 +14,7 @@ import com.example.hotelroll.data.model.StayStatus
 import java.time.LocalDate
 import com.example.hotelroll.data.dto.RollItem
 import kotlinx.coroutines.flow.Flow
+import com.example.hotelroll.ui.utilities.StayUi
 
 class HotelRepository(
     private val db: HotelDatabase,
@@ -201,6 +202,33 @@ class HotelRepository(
             ?: return "" // no need to throw more exceptions really but just to handle the reservation? type
 
         return room.roomNumber
+    }
+
+    // for reservation & stay notes update
+    suspend fun updateStayNotes(
+        stayId: Long,
+        notes: String
+    ) {
+        stayDao.updateStayNotes(stayId, notes)
+    }
+
+    suspend fun updateReservationNotes(
+        resId: Long,
+        notes: String
+    ) {
+        reservationDao.updateReservationNotes(resId, notes)
+    }
+
+    suspend fun getStaysUi(resId: Long): List<StayUi> {
+        return stayDao.getStaysWithRoomNumber(resId).map {
+            StayUi(
+                stayId = it.stayId,
+                roomNumber = it.roomNumber,
+                people = it.peopleInRoom,
+                checkIn = it.checkInDate,
+                checkOut = it.checkOutDate
+            )
+        }
     }
 
 

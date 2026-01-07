@@ -12,7 +12,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.hotelroll.ui.res.ReservationDetailScreen
 import com.example.hotelroll.ui.res.ReservationDetailViewModel
-import com.example.hotelroll.ui.res.ReservationDetailViewModelFactory
 import com.example.hotelroll.ui.roll.RollScreen
 import com.example.hotelroll.ui.roll.RollViewModel
 import com.example.hotelroll.ui.stay.StayDetailScreen

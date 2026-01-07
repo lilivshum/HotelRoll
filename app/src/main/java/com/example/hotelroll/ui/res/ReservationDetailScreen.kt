@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.resolveDefaults
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.ui.stay.StayDetailViewModel
@@ -34,14 +35,20 @@ fun ReservationDetailScreen(
     onBackClick: () -> Unit,
     onStayClick: (Long, String, String) -> Unit
 ) {
+
     val context = LocalContext.current
     val app = context.applicationContext as HotelApplication
 
+
     val viewModel: ReservationDetailViewModel = viewModel(
-        factory = ReservationDetailViewModelFactory(repository = app.repository)
+        factory = ReservationDetailViewModelFactory(
+            repository = app.repository,
+            reservationId = reservationId
+        )
     )
+
     LaunchedEffect(reservationId) {
-        viewModel.loadReservationInfo(reservationId)
+        viewModel.loadReservationInfo()
     }
 
     val reservation = viewModel.reservation.value

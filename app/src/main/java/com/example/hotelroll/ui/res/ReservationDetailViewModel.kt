@@ -7,21 +7,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.State
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
+import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.repository.HotelRepository
-import java.time.LocalDate
+import com.example.hotelroll.ui.utilities.StayUi
 
-data class StayUi(
-    val roomNumber: String,
-    val people: Int,
-    val checkIn: LocalDate,
-    val checkOut: LocalDate,
-    val stayId: Long
-)
 class ReservationDetailViewModel(
-    private val repository: HotelRepository
+    private val repository: HotelRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    private val resId: Long =
+        checkNotNull(savedStateHandle["reservationId"]) {
+            "reservation Id is required"
+        }
     private val _stays = mutableStateOf<List<Stay>>(emptyList())
     val stays: State<List<Stay>> = _stays
 
@@ -31,23 +32,20 @@ class ReservationDetailViewModel(
     private val _staysUi = mutableStateOf<List<StayUi>>(emptyList())
     val staysUi: State<List<StayUi>> = _staysUi
 
-    fun loadReservationInfo(reservationId: Long) {
+    init{
+        loadReservationInfo()
+    }
+    fun loadReservationInfo() {
         viewModelScope.launch {
-            _stays.value = repository.getStayByResId(reservationId)
-            _reservation.value = repository.getResById(reservationId)
+            _stays.value = repository.getStayByResId(resId)
+            _reservation.value = repository.getResById(resId)
+            _staysUi.value = repository.getStaysUi(resId)
+        }
+    }
 
-            val uilist = stays.value.map {stay ->
-                StayUi (
-                    roomNumber = repository.getRoomNumberById(stay.roomId),
-                    people = stay.peopleInRoom,
-                    checkIn = stay.checkInDate,
-                    checkOut = stay.checkOutDate,
-                    stayId = stay.stayId
-                )
-
-            }
-
-            _staysUi.value = uilist
+    fun saveNotes(notes: String) {
+        viewModelScope.launch {
+            repository.updateReservationNotes(resId, notes)
         }
     }
 }

@@ -30,4 +30,14 @@ interface ReservationDao {
     @Query("SELECT * FROM reservations ORDER BY checkInDate ASC")
     suspend fun getAllReservationsSnapshot(): List<Reservation>
 
+    @Query("""UPDATE reservations
+                SET notes = :notes
+                WHERE id = :resId""")
+    suspend fun updateReservationNotes(
+        resId: Long,
+        notes: String
+    )
+
+    @Query("SELECT COUNT(*) FROM reservations")
+    suspend fun countReservations(): Int
 }

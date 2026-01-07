@@ -64,4 +64,8 @@ interface RoomDao {
 
     @Query("SELECT * FROM rooms WHERE roomNumber = :roomNumber LIMIT 1")
     suspend fun getByRoomNumber(roomNumber: String): RoomEntity?
+
+    @Query("SELECT COUNT(*) FROM rooms")
+    suspend fun countRooms(): Int
+
 }

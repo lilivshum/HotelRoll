@@ -21,6 +21,7 @@ import java.time.LocalDate
 import androidx.compose.foundation.lazy.items
 import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.ui.navigation.HotelNavGraph
+import com.example.hotelroll.ui.utilities.StayUi
 
 @Composable
 fun ResDetailInfoRow(

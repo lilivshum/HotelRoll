@@ -21,7 +21,7 @@ import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 
 @Database(
     entities = [Reservation::class, Stay::class, RoomEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 
@@ -43,15 +43,18 @@ abstract class HotelDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): HotelDatabase {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: Room.databaseBuilder(
+                val instance =  Room.databaseBuilder(
                     context.applicationContext,
                     HotelDatabase::class.java,
                     "hotel.db"
                 )
                     .fallbackToDestructiveMigration()
-                    .addCallback(DatabaseCallback(context.applicationContext))
+                    .addCallback(
+                        DatabaseCallback())
                     .build()
-                    .also { INSTANCE = it }
+
+                INSTANCE = instance
+                instance
             }
         }
 

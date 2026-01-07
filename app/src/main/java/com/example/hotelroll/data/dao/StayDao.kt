@@ -4,6 +4,7 @@ import com.example.hotelroll.data.model.Reservation
 import java.time.LocalDate
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.model.StayStatus
+import com.example.hotelroll.data.dto.StayWithRoomNumber
 
 
 @Dao
@@ -58,5 +59,33 @@ interface StayDao {
     suspend fun getByResId(
         resId: Long
     ): List<Stay>
+
+    @Query("""
+        UPDATE stays
+        SET notes = :notes
+        WHERE stayId= :stayId
+    """)
+    suspend fun updateStayNotes(
+        stayId: Long,
+        notes: String
+    )
+
+    @Query("SELECT COUNT(*) FROM stays")
+    suspend fun countStays(): Int
+
+    @Query("""
+        SELECT 
+            s.stayId AS stayId,
+            r.roomNumber AS roomNumber,
+            s.peopleInRoom AS peopleInRoom,
+            s.checkInDate AS checkInDate,
+            s.checkOutDate AS checkOutDate
+        FROM stays s
+        INNER JOIN rooms r ON s.roomId = r.roomId
+        WHERE s.reservationId = :reservationId
+    """)
+    suspend fun getStaysWithRoomNumber(
+        reservationId: Long
+    ): List<StayWithRoomNumber>
 
 }

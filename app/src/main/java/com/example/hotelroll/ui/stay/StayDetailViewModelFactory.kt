@@ -1,18 +1,23 @@
 package com.example.hotelroll.ui.stay
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.hotelroll.repository.HotelRepository
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModel
 
 class StayDetailViewModelFactory(
     private val repository: HotelRepository,
-    ) : ViewModelProvider.Factory {
+    private val stayId: Long
+) : ViewModelProvider.Factory {
 
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(StayDetailViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return StayDetailViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return StayDetailViewModel(
+            repository = repository,
+            savedStateHandle = SavedStateHandle(
+                mapOf("stayId" to stayId)
+            )
+        ) as T
     }
+}
+

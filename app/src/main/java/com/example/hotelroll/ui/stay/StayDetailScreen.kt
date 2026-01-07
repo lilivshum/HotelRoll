@@ -12,10 +12,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import androidx.compose.material3.*
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.unit.dp
-
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import com.example.hotelroll.ui.utilities.NotesEditor
+import androidx.lifecycle.ViewModelProvider
 
 
 
@@ -33,10 +33,14 @@ fun StayDetailScreen(
     val app = context.applicationContext as HotelApplication
 
     val viewModel: StayDetailViewModel = viewModel(
-        factory = StayDetailViewModelFactory(repository = app.repository)
+        factory = StayDetailViewModelFactory(
+            repository = app.repository,
+            stayId = stayId
+        )
     )
+
     LaunchedEffect(stayId) {
-        viewModel.loadStay(stayId)
+        viewModel.loadStay()
     }
 
     val stay by viewModel.stay.collectAsState()
@@ -55,6 +59,10 @@ fun StayDetailScreen(
                 stay = it,
                 modifier = Modifier.padding(padding),
                 reservationName
+            )
+            NotesEditor(
+                notes = it.notes.orEmpty(),
+                onNotesChanged = viewModel::onNotesChanged
             )
         }
 
