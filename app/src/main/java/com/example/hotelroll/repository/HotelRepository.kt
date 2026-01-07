@@ -95,6 +95,9 @@ class HotelRepository(
 
         )
 
+        val res = reservationDao.getById(reservationId)
+
+
         return stayDao.insert(stay)
     }
 
@@ -172,6 +175,7 @@ class HotelRepository(
 
     }
 
+    // for detail viewing in ui
     suspend fun getRoomRoll(date: LocalDate): List<RollItem>{
         return roomDao.getRoll(date = date)
     }
@@ -183,6 +187,22 @@ class HotelRepository(
     suspend fun getAllReservationsSnapshot(): List<Reservation> {
         return reservationDao.getAllReservationsSnapshot()
     }
+
+    suspend fun getStayByResId(resId: Long): List<Stay> {
+        return stayDao.getByResId(resId)
+    }
+
+    suspend fun getResById(resId: Long): Reservation? {
+        return reservationDao.getById(resId)
+    }
+
+    suspend fun getRoomNumberById(roomId: Long): String {
+        val room = roomDao.getById(roomId)
+            ?: return "" // no need to throw more exceptions really but just to handle the reservation? type
+
+        return room.roomNumber
+    }
+
 
 }
 

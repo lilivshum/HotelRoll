@@ -50,4 +50,13 @@ interface StayDao {
     @Update
     suspend fun update(stay: Stay)
 
+    // helps to obtain all the rooms / stays under a reservation
+    @Query("""
+        SELECT * FROM stays
+        WHERE reservationId = :resId
+    """)
+    suspend fun getByResId(
+        resId: Long
+    ): List<Stay>
+
 }
