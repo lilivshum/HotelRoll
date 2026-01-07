@@ -1,8 +1,14 @@
 package com.example.hotelroll.ui.stay
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import androidx.compose.material3.*
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.hotelroll.ui.utilities.NotesEditor
@@ -45,6 +52,8 @@ fun StayDetailScreen(
 
     val stay by viewModel.stay.collectAsState()
 
+    val notes by viewModel.notes.collectAsState()
+
     //UI
     Scaffold(
         topBar = {
@@ -55,15 +64,23 @@ fun StayDetailScreen(
         }
     ) { padding ->
         stay?.let {
-            StayDetailContent(
-                stay = it,
-                modifier = Modifier.padding(padding),
-                reservationName
-            )
-            NotesEditor(
-                notes = it.notes.orEmpty(),
-                onNotesChanged = viewModel::onNotesChanged
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                StayDetailContent(
+                    stay = it,
+                    modifier = Modifier.padding(padding),
+                    reservationName
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                NotesEditor(
+                    notes = notes,
+                    onNotesChanged = viewModel::onNotesChanged
+                )
+            }
         }
 
     }

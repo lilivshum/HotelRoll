@@ -13,6 +13,7 @@ import com.example.hotelroll.data.model.Stay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -35,6 +36,7 @@ class StayDetailViewModel (
     val stay: StateFlow<Stay?> = _stay
 
     private val notesFlow = MutableStateFlow("")
+    val notes = notesFlow.asStateFlow()
 
     init {
         loadStay()
