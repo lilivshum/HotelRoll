@@ -1,6 +1,7 @@
 package com.example.hotelroll.ui.utilities
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -34,10 +35,10 @@ fun NotesEditor(
             onValueChange = onNotesChanged,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 120.dp),
+                .weight(1f),
             placeholder = { Text("Enter notes about this stay…") },
             singleLine = false,
-            maxLines = 6
+            maxLines = 10
         )
     }
 }

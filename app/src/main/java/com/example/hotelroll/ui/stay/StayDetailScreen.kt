@@ -68,14 +68,14 @@ fun StayDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .verticalScroll(rememberScrollState())
+
             ) {
                 StayDetailContent(
                     stay = it,
                     modifier = Modifier.padding(padding),
                     reservationName
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+                //Spacer(modifier = Modifier.height(24.dp))
                 NotesEditor(
                     notes = notes,
                     onNotesChanged = viewModel::onNotesChanged
