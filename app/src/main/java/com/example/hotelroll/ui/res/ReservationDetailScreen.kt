@@ -26,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.ui.stay.StayDetailViewModel
 import com.example.hotelroll.ui.stay.StayDetailViewModelFactory
+import com.example.hotelroll.ui.utilities.NotesEditor
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +54,7 @@ fun ReservationDetailScreen(
 
     val reservation = viewModel.reservation.value
     val stays = viewModel.staysUi.value
+    val notes by viewModel.notes.collectAsState()
 
     reservation?.let {
         Scaffold(
@@ -81,7 +83,10 @@ fun ReservationDetailScreen(
                 ResDetailInfoRow("Nights", reservation.nights.toString())
                 Text("Stays")
                 ResRoomsSection(stays, reservation.resName, onStayClick)
-                ResNotesSection(reservation.notes)
+                NotesEditor(
+                    notes = notes,
+                    onNotesChanged = viewModel::onNotesChanged
+                )
 
             }
         }

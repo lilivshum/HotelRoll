@@ -13,7 +13,13 @@ import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.ui.utilities.StayUi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
+@OptIn(FlowPreview::class)
 class ReservationDetailViewModel(
     private val repository: HotelRepository,
     savedStateHandle: SavedStateHandle
@@ -32,20 +38,34 @@ class ReservationDetailViewModel(
     private val _staysUi = mutableStateOf<List<StayUi>>(emptyList())
     val staysUi: State<List<StayUi>> = _staysUi
 
+    // For saveable notes on the spot
+    private val notesFlow = MutableStateFlow("")
+    val notes = notesFlow.asStateFlow()
+
+
     init{
         loadReservationInfo()
+
+        viewModelScope.launch {
+            notesFlow
+                .debounce(500)        // wait for typing to stop
+                .distinctUntilChanged()
+                .collect { newNotes ->
+                    val current = reservation.value ?: return@collect
+                    repository.updateReservationNotes(current.id, newNotes)
+                }
+        }
     }
     fun loadReservationInfo() {
         viewModelScope.launch {
             _stays.value = repository.getStayByResId(resId)
             _reservation.value = repository.getResById(resId)
             _staysUi.value = repository.getStaysUi(resId)
+            notesFlow.value = _reservation.value?.notes.orEmpty()
         }
     }
 
-    fun saveNotes(notes: String) {
-        viewModelScope.launch {
-            repository.updateReservationNotes(resId, notes)
-        }
+    fun onNotesChanged(text: String){
+        notesFlow.value = text
     }
 }
