@@ -25,6 +25,7 @@ data class Stay(
     val reservationId: Long,
     val roomId: Long,
     val peopleInRoom: Int,
+    val kidsInRoom: Int = 0,
     val checkInDate: LocalDate,
     val checkOutDate: LocalDate,
     val status: StayStatus = StayStatus.PENDING,// pending whether guests have confirmed / arrived

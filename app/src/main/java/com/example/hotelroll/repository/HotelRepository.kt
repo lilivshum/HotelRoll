@@ -28,6 +28,7 @@ class HotelRepository(
     suspend fun createReservation(
         resName: String,
         noGuests: Int,
+        noKids: Int,
         notes: String?,
         checkInDate: LocalDate,
         nights: Int
@@ -35,6 +36,7 @@ class HotelRepository(
         val reservation = manager.createReservation(
             resName,
             noGuests,
+            noKids,
             notes,
             checkInDate,
             nights
@@ -47,6 +49,7 @@ class HotelRepository(
         reservationId: Long,
         roomNumber: String,
         peopleInRoom: Int,
+        kidsInRoom: Int,
         checkInDate: LocalDate,
         nights: Int,
         tariff: Double?
@@ -89,6 +92,7 @@ class HotelRepository(
         val stay = manager.createStay(
             reservationId,
             peopleInRoom = peopleInRoom,
+            kidsInRoom = kidsInRoom,
             roomId = room.roomId,
             checkInDate = checkInDate,
             checkOutDate = checkOutDate,
@@ -106,17 +110,20 @@ class HotelRepository(
     suspend fun createReservationWithStay(
         resName: String,
         noGuests: Int,
+        noKids: Int,
         notes: String?,
         checkInDate: LocalDate,
         nights: Int,
         roomNumber: String,
         peopleInRoom: Int,
+        kidsInRoom: Int,
         tariff: Double?
     ) {
         db.withTransaction {
             val resId = createReservation(
                 resName,
                 noGuests,
+                noKids,
                 notes,
                 checkInDate,
                 nights
@@ -125,6 +132,7 @@ class HotelRepository(
                 resId,
                 roomNumber,
                 peopleInRoom,
+                kidsInRoom,
                 checkInDate,
                 nights,
                 tariff
@@ -224,9 +232,10 @@ class HotelRepository(
             StayUi(
                 stayId = it.stayId,
                 roomNumber = it.roomNumber,
-                people = it.peopleInRoom,
+                adults = it.peopleInRoom,
                 checkIn = it.checkInDate,
-                checkOut = it.checkOutDate
+                checkOut = it.checkOutDate,
+                kids = it.kidsInRoom
             )
         }
     }

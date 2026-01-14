@@ -57,6 +57,11 @@ fun ReservationDetailScreen(
     val notes by viewModel.notes.collectAsState()
 
     reservation?.let {
+        // function that displays kids and adults in a adults + kids way
+        var pax = reservation.noGuests.toString()
+        if(reservation.noKids > 0){
+            pax = pax + "+" + reservation.noKids.toString()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -78,7 +83,7 @@ fun ReservationDetailScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                ResDetailInfoRow("Guests", reservation.noGuests.toString())
+                ResDetailInfoRow("Guests", pax)
                 ResDetailInfoRow("Check-in", reservation.checkInDate.toString())
                 ResDetailInfoRow("Nights", reservation.nights.toString())
                 Text("Stays")

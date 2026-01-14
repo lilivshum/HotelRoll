@@ -44,8 +44,15 @@ fun RollRow(
             style = MaterialTheme.typography.bodyLarge
         )
 
+        var pax = ""
+        item.peopleInRoom?.let {
+            pax = item.peopleInRoom.toString()
+            if((item.kidsInRoom?: 0 )> 0 ){
+                pax += "+" + item.kidsInRoom.toString()
+            }
+        }
         Text(
-            text = item.peopleInRoom?.toString() ?: "",
+            text = pax,
             modifier = Modifier.weight(RollColumns.PEOPLE),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge

@@ -7,6 +7,7 @@ class HotelManager {
     fun createReservation(
         resName: String,
         noGuests: Int,
+        noKids: Int,
         notes: String?,
         checkInDate: LocalDate,
         nights: Int
@@ -16,9 +17,18 @@ class HotelManager {
             "Error: 0 days of stay"
         }
 
+        require(noGuests > 0 ){
+            "Error: 0 guests assigned"
+        }
+
+        require(noKids >= 0) {
+            "Error: invalid number of kids"
+        }
+
         return Reservation(
             resName = resName,
             noGuests = noGuests,
+            noKids = noKids,
             checkInDate = checkInDate,
             nights = nights,
             notes = notes
@@ -28,6 +38,7 @@ class HotelManager {
     fun createStay(
         resId: Long,
         peopleInRoom: Int,
+        kidsInRoom: Int,
         roomId: Long,
         checkInDate: LocalDate,
         checkOutDate: LocalDate,
@@ -40,11 +51,17 @@ class HotelManager {
         require(peopleInRoom > 0){
             "Error: invalid amount of guests"
         }
+
+        require(kidsInRoom >= 0){
+            "Error: invalid amount of kids "
+        }
+
         return Stay(
 
             reservationId = resId,
             roomId = roomId,
             peopleInRoom = peopleInRoom,
+            kidsInRoom = kidsInRoom,
             checkInDate = checkInDate,
             checkOutDate = checkOutDate,
             tariff = tariff

@@ -8,5 +8,6 @@ data class StayWithRoomNumber(
     val roomNumber: String,
     val peopleInRoom: Int,
     val checkInDate: LocalDate,
-    val checkOutDate: LocalDate
+    val checkOutDate: LocalDate,
+    val kidsInRoom: Int
 )

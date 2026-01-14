@@ -53,6 +53,7 @@ class HotelApplication : Application() {
                 Reservation(
                     resName = "Alice Smith",
                     noGuests = 2,
+                    noKids = 2,
                     checkInDate = LocalDate.now(),
                     nights = 2,
                     notes = "Late arrival"
@@ -63,6 +64,7 @@ class HotelApplication : Application() {
                 resId1,
                 "101",
                 2,
+                kidsInRoom = 2,
                 LocalDate.now(),
                 2,
                 45.0
@@ -83,6 +85,7 @@ class HotelApplication : Application() {
                 resId2,
                 "102",
                 1,
+                kidsInRoom = 0,
                 LocalDate.now().plusDays(2),
                 3,
                 70.0

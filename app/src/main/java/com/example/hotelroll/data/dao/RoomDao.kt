@@ -50,7 +50,8 @@ interface RoomDao {
         SELECT r.roomId AS roomId,
                r.roomNumber AS roomNumber,
                res.resName AS reservationName,
-               s.peopleInRoom AS peopleInRoom, 
+               s.peopleInRoom AS peopleInRoom,
+                s. kidsInRoom AS kidsInRoom, 
                COALESCE(s.tariff, r.tariff) AS tariff, 
                s.stayId AS stayId
         FROM rooms r

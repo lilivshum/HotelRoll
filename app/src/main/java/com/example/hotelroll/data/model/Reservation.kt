@@ -11,6 +11,7 @@ data class Reservation(
     val checkInDate: LocalDate,
     val nights: Int,
     val noGuests: Int,
+    val noKids: Int = 0,
     val notes: String? = null
 )
 

@@ -62,11 +62,16 @@ fun ResNotesSection(notes: String?) {
 @Composable
 fun StayRow(
     roomNumber: String,
-    people: Int,
+    adults: Int,
+    kids: Int,
     checkIn: LocalDate,
     checkOut: LocalDate,
     onClick: () -> Unit
 ) {
+    var pax = adults.toString()
+    if(kids > 0){
+        pax = "$pax+$kids"
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,7 +88,7 @@ fun StayRow(
             )
 
             Text(
-                text = "$people pax",
+                text = "$pax pax",
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
@@ -111,7 +116,8 @@ fun ResRoomsSection(stays: List<StayUi>,
         items(stays) { stay ->
             StayRow(
                 stay.roomNumber,
-                stay.people,
+                stay.adults,
+                stay.kids,
                 stay.checkIn,
                 stay.checkOut,
                 onClick = { onStayClick(stay.stayId, stay.roomNumber, resName)}

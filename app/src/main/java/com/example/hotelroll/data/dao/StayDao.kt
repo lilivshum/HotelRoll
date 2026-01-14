@@ -79,7 +79,8 @@ interface StayDao {
             r.roomNumber AS roomNumber,
             s.peopleInRoom AS peopleInRoom,
             s.checkInDate AS checkInDate,
-            s.checkOutDate AS checkOutDate
+            s.checkOutDate AS checkOutDate, 
+            s.kidsInRoom AS kidsInRoom
         FROM stays s
         INNER JOIN rooms r ON s.roomId = r.roomId
         WHERE s.reservationId = :reservationId

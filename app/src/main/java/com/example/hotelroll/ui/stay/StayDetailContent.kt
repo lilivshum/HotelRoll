@@ -15,6 +15,10 @@ fun StayDetailContent(
     modifier: Modifier = Modifier,
     reservationName: String
 ) {
+    var pax = stay.peopleInRoom.toString()
+    if(stay.kidsInRoom > 0){
+        pax = pax + "+" + stay.kidsInRoom.toString()
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -22,7 +26,7 @@ fun StayDetailContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         StayDetailsInfoRow("Reservation", reservationName)
-        StayDetailsInfoRow("Guests", stay.peopleInRoom.toString())
+        StayDetailsInfoRow("Guests", pax)
         StayDetailsInfoRow("Check-in", stay.checkInDate.toString())
         StayDetailsInfoRow("Check-out", stay.checkOutDate.toString())
         StayDetailsInfoRow("Status", stay.status.name)
