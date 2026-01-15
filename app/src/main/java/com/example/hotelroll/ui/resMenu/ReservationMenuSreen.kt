@@ -14,13 +14,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.hotelroll.data.model.Reservation
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 
 @Composable
 fun ReservationMenuScreen(
-    reservations: List<Reservation>,
+    viewModel: ReservationViewModel,
     onReservationClick: (Long) -> Unit
 ) {
+    val reservations by viewModel.reservations
+        .collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxHeight()

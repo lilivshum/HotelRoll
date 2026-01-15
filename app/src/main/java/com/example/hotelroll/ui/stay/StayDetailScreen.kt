@@ -28,7 +28,7 @@ import androidx.lifecycle.ViewModelProvider
 
 @Composable
 fun StayDetailScreen(
-    stayId: Long,
+    viewModel: StayDetailViewModel,
     roomNumber: String,
     reservationName: String,
     onBack: () -> Unit = {}
@@ -36,19 +36,6 @@ fun StayDetailScreen(
     // this could be optimized better I guess or made more consistent like with the
     // Room Roll Screen constructor
 
-    val context = LocalContext.current
-    val app = context.applicationContext as HotelApplication
-
-    val viewModel: StayDetailViewModel = viewModel(
-        factory = StayDetailViewModelFactory(
-            repository = app.repository,
-            stayId = stayId
-        )
-    )
-
-    LaunchedEffect(stayId) {
-        viewModel.loadStay()
-    }
 
     val stay by viewModel.stay.collectAsState()
 

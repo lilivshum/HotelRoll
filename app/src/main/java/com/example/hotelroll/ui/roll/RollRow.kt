@@ -13,20 +13,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextIndent
 import com.example.hotelroll.ui.roll.RollColumns
-
+import java.time.LocalDate
 
 
 @Composable
 fun RollRow(
     item: RollItem,
-    onStayClick: (Long, String, String) -> Unit
+    onStayClick: (Long, String, String) -> Unit,
+    onEmptyClick: (Long, String, String) -> Unit,
+    date: LocalDate
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .clickable {
-                item.stayId?.let {onStayClick(it, item.roomNumber, item.reservationName?:"")}
+                if(item.stayId != null) {
+                    onStayClick(item.stayId, item.roomNumber, item.reservationName?:"")
+
+                } else {
+                    onEmptyClick(
+                        item.roomId,
+                        item.roomNumber,
+                        date.toString()
+                    )
+                }
             },
         verticalAlignment = Alignment.CenterVertically
     ) {

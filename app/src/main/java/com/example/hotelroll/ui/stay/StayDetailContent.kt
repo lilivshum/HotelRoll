@@ -16,7 +16,7 @@ fun StayDetailContent(
     reservationName: String
 ) {
     var pax = stay.peopleInRoom.toString()
-    if(stay.kidsInRoom > 0){
+    if(stay.kidsInRoom>0){
         pax = pax + "+" + stay.kidsInRoom.toString()
     }
     Column(

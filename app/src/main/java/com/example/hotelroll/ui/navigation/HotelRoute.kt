@@ -1,5 +1,7 @@
 package com.example.hotelroll.ui.navigation
 
+import java.time.LocalDate
+
 sealed class HotelRoute(val route: String) {
 
     object Roll : HotelRoute("roll")
@@ -16,5 +18,12 @@ sealed class HotelRoute(val route: String) {
     ) {
         fun createRoute(stayId: Long, roomNumber: String, resName: String) =
             "stay/$stayId/roomNumber/$roomNumber/reservationName/$resName"
+    }
+
+    object CreateStay: HotelRoute(
+        "roomId/{roomId}/roomNumber/{roomNumber}/date/{date}"
+    ) {
+        fun createRoute(roomId: Long, roomNumber: String, date: String) =
+            "roomId/$roomId/roomNumber/$roomNumber/date/$date"
     }
 }

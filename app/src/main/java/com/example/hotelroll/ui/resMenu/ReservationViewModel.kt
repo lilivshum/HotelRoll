@@ -8,23 +8,21 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 
 
 class ReservationViewModel(
     private val repository: HotelRepository
 ) : ViewModel() {
 
-    private val _reservations = mutableStateOf<List<Reservation>>(emptyList())
-    val reservations: State<List<Reservation>> = _reservations
-
-    init {
-        loadReservations()
+    val reservations: StateFlow<List<Reservation>> =
+        repository.getAllReservationsSnapshot()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
     }
-
-    private fun loadReservations() {
-        viewModelScope.launch {
-            _reservations.value = repository.getAllReservationsSnapshot()
-        }
-    }
-}

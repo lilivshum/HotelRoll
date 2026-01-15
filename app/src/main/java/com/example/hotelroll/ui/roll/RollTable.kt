@@ -14,12 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import com.example.hotelroll.data.dto.RollItem
-
-
+import java.time.LocalDate
 
 
 @Composable
-fun RollTable(rollItems: List<RollItem>, onStayClick: (Long, String, String) -> Unit) {
+fun RollTable(rollItems: List<RollItem>,
+              onStayClick: (Long, String, String) -> Unit,
+              onEmptyClick: (Long, String, String) -> Unit,
+              date: LocalDate){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,7 +35,7 @@ fun RollTable(rollItems: List<RollItem>, onStayClick: (Long, String, String) -> 
             modifier = Modifier.fillMaxSize()
         ) {
             items(rollItems) { item ->
-                RollRow(item, onStayClick)
+                RollRow(item, onStayClick, onEmptyClick, date)
             }
         }
     }

@@ -25,6 +25,8 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
 import com.example.hotelroll.ui.navigation.HotelRoute
 
@@ -59,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         tonalElevation = 2.dp
                     ) {
                         ReservationMenuScreen(
-                            reservations = reservationViewModel.reservations.value,
+                            reservationViewModel,
                             onReservationClick = { resId ->
 //                                scope.launch {
 //                                    drawerState.close()
@@ -82,7 +84,7 @@ class MainActivity : ComponentActivity() {
                                 drawerContainerColor = MaterialTheme.colorScheme.surface
                             ) {
                                 ReservationMenuScreen(
-                                    reservations = reservationViewModel.reservations.value,
+                                    viewModel = reservationViewModel,
                                     onReservationClick = {
                                         resId ->
                                         navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))

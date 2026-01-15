@@ -39,7 +39,7 @@ fun RollTableHeader() {
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Tariff",
+            text = "Rate",
             modifier = Modifier.weight(RollColumns.TARIFF),
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center

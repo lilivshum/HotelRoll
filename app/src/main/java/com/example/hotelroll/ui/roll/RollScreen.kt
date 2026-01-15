@@ -18,7 +18,8 @@ import com.example.hotelroll.ui.roll.DateHeader
 @Composable
 fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                app: HotelApplication = LocalContext.current.applicationContext as HotelApplication,
-               onMenuClick: () -> Unit
+               onMenuClick: () -> Unit,
+               onEmptyClick: (Long, String, String) -> Unit
 ) {
     val viewModel: RollViewModel = viewModel(
         factory = RollViewModelFactory(app.repository)
@@ -28,10 +29,12 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
 
     // Scaffold is optional, but useful for padding/top bars
     Scaffold { paddingValues ->
+        val date = viewModel.date.collectAsState().value
         Column(modifier = Modifier.padding(paddingValues)) {
             // Date navigation header
+
             DateHeader(
-                date = viewModel.date.collectAsState().value,
+                date = date,
                 onPrevious = viewModel::prevDay,
                 onNext = viewModel::nextDay,
                 onMenuClick = onMenuClick
@@ -42,7 +45,7 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
             rollItems.forEach { println(it) }
 
             // Table with horizontal scroll + vertical scrolling inside
-            RollTable(rollItems = rollItems, onStayClick)
+            RollTable(rollItems = rollItems, onStayClick, onEmptyClick, date )
         }
     }
 }

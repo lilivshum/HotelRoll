@@ -2,19 +2,24 @@ package com.example.hotelroll.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.hotelroll.HotelApplication
+import com.example.hotelroll.ui.createStay.CreateStayScreen
+import com.example.hotelroll.ui.createStay.CreateStayViewModel
+import com.example.hotelroll.ui.createStay.CreateStayViewModelFactory
 import com.example.hotelroll.ui.res.ReservationDetailScreen
-import com.example.hotelroll.ui.res.ReservationDetailViewModel
 import com.example.hotelroll.ui.roll.RollScreen
-import com.example.hotelroll.ui.roll.RollViewModel
 import com.example.hotelroll.ui.stay.StayDetailScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.hotelroll.ui.stay.StayDetailViewModel
+import com.example.hotelroll.ui.stay.StayDetailViewModelFactory
+import java.time.LocalDate
 
 @Composable
 fun HotelNavGraph(
@@ -22,6 +27,7 @@ fun HotelNavGraph(
     onMenuClick: () -> Unit,
     navController: NavHostController
 ) {
+    val app = LocalContext.current.applicationContext as HotelApplication
 
     NavHost(
         navController = navController,
@@ -33,7 +39,13 @@ fun HotelNavGraph(
                 onStayClick = { stayId, roomNumber, reservationName->
                     navController.navigate(HotelRoute.StayDetail.createRoute(stayId, roomNumber, reservationName))
                 },
-                onMenuClick = onMenuClick
+                onMenuClick = onMenuClick,
+
+                onEmptyClick = {roomId, roomNumber, date ->
+                    navController.navigate(
+                        HotelRoute.CreateStay.createRoute(roomId, roomNumber, date)
+                    )
+                }
             )
         }
 
@@ -53,9 +65,20 @@ fun HotelNavGraph(
                 }
             )
         ) { backStackEntry ->
+
+
+            val stayId = backStackEntry.arguments!!.getLong("stayId")
+
+            val viewModel: StayDetailViewModel = viewModel(
+                factory = StayDetailViewModelFactory(
+                    repository = app.repository,
+                    stayId = stayId
+                )
+            )
+
             StayDetailScreen(
-                stayId = backStackEntry.arguments!!.getLong("stayId"),
-                    onBack = { navController.popBackStack()},
+                viewModel = viewModel,
+                onBack = { navController.popBackStack()},
                 roomNumber = backStackEntry.arguments!!.getString("roomNumber") ?: "Room",
                 reservationName = backStackEntry.arguments!!.getString("reservationName") ?:
                 ""
@@ -83,5 +106,32 @@ fun HotelNavGraph(
                 },
             )
         }
+
+        // create stay navigation route
+        composable(
+            route = HotelRoute.CreateStay.route,
+            arguments = listOf(
+                navArgument("roomId") {
+                    type = NavType.LongType },
+                navArgument("roomNumber") {
+                    type = NavType.StringType
+                },
+                navArgument("date") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+
+            val viewModel: CreateStayViewModel = viewModel(
+                backStackEntry,
+                factory = CreateStayViewModelFactory(app.repository)
+            )
+
+            CreateStayScreen(
+                onSaved = { navController.popBackStack() },
+                onCancel = {navController.popBackStack() }
+            )
+        }
+
     }
 }

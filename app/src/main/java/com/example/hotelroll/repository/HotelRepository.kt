@@ -52,7 +52,8 @@ class HotelRepository(
         kidsInRoom: Int,
         checkInDate: LocalDate,
         nights: Int,
-        tariff: Double?
+        tariff: Double?,
+        notes: String?
     ): Long {
 
         // checks if nights amount is valid (checkOutDate Validation)
@@ -96,7 +97,8 @@ class HotelRepository(
             roomId = room.roomId,
             checkInDate = checkInDate,
             checkOutDate = checkOutDate,
-            tariff = finalTariff
+            tariff = finalTariff,
+            notes = notes
 
         )
 
@@ -106,6 +108,8 @@ class HotelRepository(
         return stayDao.insert(stay)
     }
 
+    // creates an a stay immediately with the reservation information
+    // cases when only one room is used
     /** Atomic create + assign */
     suspend fun createReservationWithStay(
         resName: String,
@@ -115,8 +119,6 @@ class HotelRepository(
         checkInDate: LocalDate,
         nights: Int,
         roomNumber: String,
-        peopleInRoom: Int,
-        kidsInRoom: Int,
         tariff: Double?
     ) {
         db.withTransaction {
@@ -131,11 +133,12 @@ class HotelRepository(
             assignRoom(
                 resId,
                 roomNumber,
-                peopleInRoom,
-                kidsInRoom,
+                noGuests,
+                noKids,
                 checkInDate,
                 nights,
-                tariff
+                tariff,
+                notes
             )
         }
     }
@@ -193,7 +196,7 @@ class HotelRepository(
         return stayDao.getById(id)
     }
 
-    suspend fun getAllReservationsSnapshot(): List<Reservation> {
+    fun getAllReservationsSnapshot(): Flow<List<Reservation>> {
         return reservationDao.getAllReservationsSnapshot()
     }
 

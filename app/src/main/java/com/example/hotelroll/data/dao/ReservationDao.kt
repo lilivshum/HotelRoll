@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.hotelroll.data.model.Reservation
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 @Dao
@@ -28,7 +29,7 @@ interface ReservationDao {
     suspend fun getById(id: Long): Reservation?
 
     @Query("SELECT * FROM reservations ORDER BY checkInDate ASC")
-    suspend fun getAllReservationsSnapshot(): List<Reservation>
+    fun getAllReservationsSnapshot(): Flow<List<Reservation>>
 
     @Query("""UPDATE reservations
                 SET notes = :notes
