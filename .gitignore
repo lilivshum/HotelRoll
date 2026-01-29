@@ -1,15 +1,24 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+
+# extra stuff I dont know what they are 
 .DS_Store
-/build
 /captures
 .externalNativeBuild
 .cxx
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+
+# Kotlin
+.kotlin/
+
+# Local config
 local.properties
+
+# Logs
+*.log
+
