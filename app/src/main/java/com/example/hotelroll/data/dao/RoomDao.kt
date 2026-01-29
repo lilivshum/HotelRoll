@@ -53,7 +53,8 @@ interface RoomDao {
                s.peopleInRoom AS peopleInRoom,
                 s. kidsInRoom AS kidsInRoom, 
                COALESCE(s.tariff, r.tariff) AS tariff, 
-               s.stayId AS stayId
+               s.stayId AS stayId, 
+               s.tariffType AS tariffType
         FROM rooms r
         LEFT JOIN stays s ON s.roomId = r.roomId
             AND :date >= s.checkInDate
@@ -68,5 +69,10 @@ interface RoomDao {
 
     @Query("SELECT COUNT(*) FROM rooms")
     suspend fun countRooms(): Int
+
+    @Query("""SELECT tariff FROM rooms  
+        WHERE roomId = :id LIMIT 1
+        """ )
+    suspend fun getRoomTariff(id: Long): Double
 
 }

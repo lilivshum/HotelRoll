@@ -15,5 +15,5 @@ data class RoomEntity(
     val roomNumber: String,
     val capacity: Int,
     val status: RoomStatus = RoomStatus.AVAILABLE,
-    val tariff: Double? = null // Default tariff for a room
+    val tariff: Double = 60.0 // Default tariff for a room
 )

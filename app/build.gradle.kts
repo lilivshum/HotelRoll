@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,6 +75,15 @@ dependencies {
 
     // for ui
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+
+    // for nagivation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // dependencies for screen re-size
+    implementation("androidx.compose.material3:material3-window-size-class")
+
+    // for random icons idk
+    implementation("androidx.compose.material:material-icons-extended")
 
 
 }

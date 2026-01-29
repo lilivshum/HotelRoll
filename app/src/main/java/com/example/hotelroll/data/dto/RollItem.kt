@@ -1,5 +1,7 @@
 package com.example.hotelroll.data.dto
 
+import com.example.hotelroll.data.model.TariffType
+
 // Hotel Roll Item, depends on date, used for display
 class RollItem (
     val roomId: Long,
@@ -8,5 +10,6 @@ class RollItem (
     val reservationName: String?,
     val peopleInRoom: Int?,
     val kidsInRoom: Int?,
-    val tariff: Double?
+    val tariff: Double,
+    val tariffType: TariffType?
 )

@@ -11,8 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.example.hotelroll.data.dto.RollItem
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextIndent
-import com.example.hotelroll.ui.roll.RollColumns
+import com.example.hotelroll.data.model.TariffType
 import java.time.LocalDate
 
 
@@ -55,9 +54,19 @@ fun RollRow(
             style = MaterialTheme.typography.bodyLarge
         )
 
+        // tariff is default for each room as well so each room will always have a default
+        // pax is treated as a measure to see if a room has been set or not .. good practice? idk
         var pax = ""
+        var tariffString = ""
         item.peopleInRoom?.let {
             pax = item.peopleInRoom.toString()
+            tariffString = "$${"%.2f".format(item.tariff)}"
+
+           if(item.tariffType == TariffType.NET) {
+                tariffString += ".net"
+            } else {
+                tariffString += "+tax"
+            }
             if((item.kidsInRoom?: 0 )> 0 ){
                 pax += "+" + item.kidsInRoom.toString()
             }
@@ -69,8 +78,9 @@ fun RollRow(
             style = MaterialTheme.typography.bodyLarge
         )
 
+
         Text(
-            text = item.tariff?.let { "$${"%.2f".format(it)}" } ?: "",
+            text = tariffString,
             modifier = Modifier.weight(RollColumns.TARIFF),
             textAlign = TextAlign.End,
             style = MaterialTheme.typography.bodyLarge

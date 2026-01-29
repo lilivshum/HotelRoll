@@ -5,6 +5,11 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+enum class TariffType {
+    NET,
+    WITH_TAX
+}
+
 @Entity(
     tableName = "stays",
     foreignKeys = [
@@ -30,6 +35,7 @@ data class Stay(
     val checkOutDate: LocalDate,
     val status: StayStatus = StayStatus.PENDING,// pending whether guests have confirmed / arrived
     val tariff: Double,
+    val tariffType: TariffType = TariffType.NET,
     val notes: String? = null
 
 )

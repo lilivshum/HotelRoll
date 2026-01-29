@@ -4,9 +4,11 @@ package com.example.hotelroll
 import android.app.Application
 import com.example.hotelroll.data.database.HotelDatabase
 import com.example.hotelroll.data.model.Reservation
+import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 import com.example.hotelroll.domain.HotelManager
 import com.example.hotelroll.repository.HotelRepository
+import com.example.hotelroll.ui.createStay.TariffTypeSelector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -68,7 +70,8 @@ class HotelApplication : Application() {
                 LocalDate.now(),
                 2,
                 45.0,
-                ""
+                notes = "",
+                tariffType = TariffType.NET
             )
 
 
@@ -91,7 +94,8 @@ class HotelApplication : Application() {
                 LocalDate.now().plusDays(2),
                 3,
                 70.0,
-                ""
+                notes = "",
+                tariffType = TariffType.WITH_TAX
             )
         }
     }

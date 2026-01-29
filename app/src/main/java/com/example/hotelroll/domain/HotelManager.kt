@@ -43,6 +43,7 @@ class HotelManager {
         checkInDate: LocalDate,
         checkOutDate: LocalDate,
         tariff: Double,
+        tariffType: TariffType,
         notes: String?
     ): Stay {
         require(checkInDate < checkOutDate) {
@@ -66,6 +67,7 @@ class HotelManager {
             checkInDate = checkInDate,
             checkOutDate = checkOutDate,
             tariff = tariff,
+            tariffType = tariffType,
             notes = notes
 
         )

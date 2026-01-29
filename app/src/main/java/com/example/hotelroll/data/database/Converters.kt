@@ -5,6 +5,7 @@ package com.example.hotelroll.data.database
 import androidx.room.TypeConverter
 import java.time.LocalDate
 import com.example.hotelroll.data.model.StayStatus
+import com.example.hotelroll.data.model.TariffType
 
 class Converters {
     @TypeConverter
@@ -20,4 +21,15 @@ class Converters {
     @TypeConverter
     fun toStayStatus(value: String): StayStatus =
         StayStatus.valueOf(value)
+
+    @TypeConverter
+    fun fromTariffType(value: TariffType?): String? {
+        return value?.name
+    }
+
+    @TypeConverter
+    fun toTariffType(value: String?): TariffType? {
+        return value?.let { TariffType.valueOf(it) }
+    }
+
 }

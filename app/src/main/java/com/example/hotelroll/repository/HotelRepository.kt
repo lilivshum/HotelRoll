@@ -13,6 +13,7 @@ import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import java.time.LocalDate
 import com.example.hotelroll.data.dto.RollItem
+import com.example.hotelroll.data.model.TariffType
 import kotlinx.coroutines.flow.Flow
 import com.example.hotelroll.ui.utilities.StayUi
 
@@ -53,6 +54,7 @@ class HotelRepository(
         checkInDate: LocalDate,
         nights: Int,
         tariff: Double?,
+        tariffType: TariffType,
         notes: String?
     ): Long {
 
@@ -98,6 +100,7 @@ class HotelRepository(
             checkInDate = checkInDate,
             checkOutDate = checkOutDate,
             tariff = finalTariff,
+            tariffType = tariffType,
             notes = notes
 
         )
@@ -119,7 +122,8 @@ class HotelRepository(
         checkInDate: LocalDate,
         nights: Int,
         roomNumber: String,
-        tariff: Double?
+        tariff: Double?,
+        tariffType: TariffType,
     ) {
         db.withTransaction {
             val resId = createReservation(
@@ -138,6 +142,7 @@ class HotelRepository(
                 checkInDate,
                 nights,
                 tariff,
+                tariffType,
                 notes
             )
         }
@@ -243,6 +248,9 @@ class HotelRepository(
         }
     }
 
+    suspend fun getRoomTariff(id: Long): Double {
+        return roomDao.getRoomTariff(id)
+    }
 
 }
 
