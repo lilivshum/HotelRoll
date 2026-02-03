@@ -1,6 +1,7 @@
 package com.example.hotelroll
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -63,10 +64,20 @@ class MainActivity : ComponentActivity() {
                         ReservationMenuScreen(
                             reservationViewModel,
                             onReservationClick = { resId ->
-//                                scope.launch {
-//                                    drawerState.close()
-//                                }
-                                navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))}
+
+                                navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
+                                scope.launch {
+                                    drawerState.close()
+                                }
+                            },
+
+                            onAddReservationClick = {
+                               scope.launch {
+                                   drawerState.close()
+                                   navController.navigate(HotelRoute.CreateRes.createRoute())
+                               }
+                            }
+
                         )
 
                         HotelNavGraph(
@@ -90,6 +101,12 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
                                         scope.launch {
                                             drawerState.close()
+                                        }
+                                    },
+                                    onAddReservationClick = {
+                                        scope.launch {
+                                            drawerState.close()
+                                            navController.navigate(HotelRoute.CreateRes.createRoute())
                                         }
                                     }
                                 )

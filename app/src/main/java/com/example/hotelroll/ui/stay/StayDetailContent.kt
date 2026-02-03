@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import com.example.hotelroll.data.model.Stay
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
+import com.example.hotelroll.data.model.TariffType
 
 @Composable
 fun StayDetailContent(
@@ -16,6 +17,12 @@ fun StayDetailContent(
     reservationName: String
 ) {
     var pax = stay.peopleInRoom.toString()
+    var rate_string = stay.tariff.toString()
+    if(stay.tariffType == TariffType.NET) {
+        rate_string += ".net"
+    } else {
+        rate_string += "+tax"
+    }
     if(stay.kidsInRoom>0){
         pax = pax + "+" + stay.kidsInRoom.toString()
     }
@@ -29,6 +36,7 @@ fun StayDetailContent(
         StayDetailsInfoRow("Guests", pax)
         StayDetailsInfoRow("Check-in", stay.checkInDate.toString())
         StayDetailsInfoRow("Check-out", stay.checkOutDate.toString())
+        StayDetailsInfoRow("Rate", rate_string)
         StayDetailsInfoRow("Status", stay.status.name)
     }
 }

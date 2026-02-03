@@ -14,6 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.hotelroll.data.model.Reservation
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
@@ -21,7 +25,8 @@ import androidx.compose.runtime.getValue
 @Composable
 fun ReservationMenuScreen(
     viewModel: ReservationViewModel,
-    onReservationClick: (Long) -> Unit
+    onReservationClick: (Long) -> Unit,
+    onAddReservationClick: () -> Unit
 ) {
     val reservations by viewModel.reservations
         .collectAsState()
@@ -36,6 +41,18 @@ fun ReservationMenuScreen(
             text = "Reservations (${reservations.size})",
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        NavigationDrawerItem(
+            label = { Text("Add reservation") },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add reservation"
+                )
+            },
+            selected = false,
+            onClick = onAddReservationClick
         )
 
         LazyColumn {

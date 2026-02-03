@@ -17,6 +17,7 @@ import com.example.hotelroll.ui.res.ReservationDetailScreen
 import com.example.hotelroll.ui.roll.RollScreen
 import com.example.hotelroll.ui.stay.StayDetailScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.hotelroll.ui.createRes.CreateResScreen
 import com.example.hotelroll.ui.stay.StayDetailViewModel
 import com.example.hotelroll.ui.stay.StayDetailViewModelFactory
 import java.time.LocalDate
@@ -78,7 +79,7 @@ fun HotelNavGraph(
 
             StayDetailScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack()},
+                onBack = { navController.navigateUp()},
                 roomNumber = backStackEntry.arguments!!.getString("roomNumber") ?: "Room",
                 reservationName = backStackEntry.arguments!!.getString("reservationName") ?:
                 ""
@@ -100,7 +101,7 @@ fun HotelNavGraph(
 
             ReservationDetailScreen(
                 reservationId,
-                onBackClick = { navController.popBackStack()},
+                onBackClick = { navController.navigateUp()},
                 onStayClick = { stayId, roomNumber, reservationName->
                     navController.navigate(HotelRoute.StayDetail.createRoute(stayId, roomNumber, reservationName))
                 },
@@ -132,6 +133,18 @@ fun HotelNavGraph(
                 onCancel = {navController.popBackStack() }
             )
         }
+
+        // create Res navigation pipeline
+        composable(
+            route = HotelRoute.CreateRes.route
+        ) {
+            CreateResScreen(
+                onBack = {navController.navigateUp()},
+                onSave = {navController.popBackStack()},
+                onCancel = {navController.popBackStack()}
+            )
+        }
+
 
     }
 }

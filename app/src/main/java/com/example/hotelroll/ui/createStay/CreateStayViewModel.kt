@@ -68,6 +68,7 @@ class CreateStayViewModel(
     fun onResNameChange(v: String) { resName = v }
     fun onKidsInRoomChange(v: Int) { kidsInRoom = v }
     fun onPeopleInRoomChange(v: Int) { peopleInRoom = v }
+
     fun checkInDateChange(v: LocalDate) { checkInDate = v}
     fun onNightsChange(v: Int) { nights = v }
     fun onNotesChange(v: String) { notes = v }
