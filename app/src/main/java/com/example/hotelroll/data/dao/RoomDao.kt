@@ -11,6 +11,7 @@ import com.example.hotelroll.data.model.RoomEntity
 import com.example.hotelroll.data.model.RoomStatus
 import java.time.LocalDate
 import com.example.hotelroll.data.dto.RollItem
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RoomDao {
@@ -49,12 +50,13 @@ interface RoomDao {
     @Query("""
         SELECT r.roomId AS roomId,
                r.roomNumber AS roomNumber,
-               res.resName AS reservationName,
+               COALESCE(s.stayName, res.resName) AS reservationName,
                s.peopleInRoom AS peopleInRoom,
                 s. kidsInRoom AS kidsInRoom, 
                COALESCE(s.tariff, r.tariff) AS tariff, 
                s.stayId AS stayId, 
-               s.tariffType AS tariffType
+               s.tariffType AS tariffType, 
+               s.status AS stayStatus
         FROM rooms r
         LEFT JOIN stays s ON s.roomId = r.roomId
             AND :date >= s.checkInDate
@@ -62,7 +64,7 @@ interface RoomDao {
         LEFT JOIN reservations res ON res.id = s.reservationId
         ORDER BY r.roomNumber
     """)
-    suspend fun getRoll(date: LocalDate): List<RollItem>
+    fun getRoll(date: LocalDate): Flow<List<RollItem>>
 
     @Query("SELECT * FROM rooms WHERE roomNumber = :roomNumber LIMIT 1")
     suspend fun getByRoomNumber(roomNumber: String): RoomEntity?

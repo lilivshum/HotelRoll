@@ -71,7 +71,21 @@ class HotelApplication : Application() {
                 2,
                 45.0,
                 notes = "",
-                tariffType = TariffType.NET
+                tariffType = TariffType.NET,
+                stayName = "Alice 1"
+            )
+
+            repository.assignRoom(
+                resId1,
+                "103",
+                2,
+                kidsInRoom = 2,
+                LocalDate.now(),
+                2,
+                45.0,
+                notes = "",
+                tariffType = TariffType.NET,
+                stayName = "Alice 2"
             )
 
 
@@ -95,7 +109,8 @@ class HotelApplication : Application() {
                 3,
                 70.0,
                 notes = "",
-                tariffType = TariffType.WITH_TAX
+                tariffType = TariffType.WITH_TAX,
+                stayName =  null
             )
         }
     }

@@ -20,11 +20,17 @@ sealed class HotelRoute(val route: String) {
             "stay/$stayId/roomNumber/$roomNumber/reservationName/$resName"
     }
 
+    // this now is a state that can either create or update / modify a state
     object CreateStay: HotelRoute(
-        "roomId/{roomId}/roomNumber/{roomNumber}/date/{date}"
+        "roomId/{roomId}/roomNumber/{roomNumber}/date/{date}/mode/{mode}?stayId={stayId}"
     ) {
-        fun createRoute(roomId: Long, roomNumber: String, date: String) =
-            "roomId/$roomId/roomNumber/$roomNumber/date/$date"
+        fun createRoute(roomId: Long, roomNumber: String, date: String, mode: StayMode, stayId: Long?): String {
+            return if (stayId != null) {
+                "roomId/$roomId/roomNumber/$roomNumber/date/$date/mode/$mode?stayId=$stayId"
+            } else {
+                "roomId/$roomId/roomNumber/$roomNumber/date/$date/mode/$mode"
+            }
+        }
     }
 
     object CreateRes: HotelRoute(

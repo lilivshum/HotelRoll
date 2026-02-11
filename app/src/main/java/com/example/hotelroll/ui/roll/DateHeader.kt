@@ -1,5 +1,6 @@
 package com.example.hotelroll.ui.roll
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,14 +18,21 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.hotelroll.ui.utilities.AppDatePickerDialog
 
 @Composable
 fun DateHeader(
     date: LocalDate,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
-    onMenuClick: () ->Unit
+    onMenuClick: () ->Unit,
+    viewModel: RollViewModel
 ) {
+    var showDatePicker by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,7 +58,9 @@ fun DateHeader(
             text = date.format(
                 DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.getDefault())
             ),
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .clickable { showDatePicker = true}
         )
 
         IconButton(onClick = onNext) {
@@ -64,4 +74,16 @@ fun DateHeader(
             Icon(Icons.Default.Add, contentDescription = "Add Reservation")
         }
     }
+
+    if (showDatePicker) {
+        AppDatePickerDialog(
+            initialDate = date,
+            onDateSelected = { selectedDate ->
+                viewModel.onDateChange(selectedDate)
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false }
+        )
+    }
+
 }

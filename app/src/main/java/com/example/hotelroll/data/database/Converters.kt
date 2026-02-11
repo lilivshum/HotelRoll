@@ -15,12 +15,14 @@ class Converters {
     fun toLocalDate(value: String): LocalDate = LocalDate.parse(value)
 
     @TypeConverter
-    fun fromStayStatus(status: StayStatus): String =
-        status.name
+    fun fromStayStatus(status: StayStatus?): String? =
+        status?.name
 
     @TypeConverter
-    fun toStayStatus(value: String): StayStatus =
-        StayStatus.valueOf(value)
+    fun toStayStatus(value: String?): StayStatus {
+        return value?.let { StayStatus.valueOf(it) }
+            ?: StayStatus.PENDING
+    }
 
     @TypeConverter
     fun fromTariffType(value: TariffType?): String? {

@@ -13,13 +13,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
+import com.example.hotelroll.ui.navigation.StayMode
 import com.example.hotelroll.ui.roll.DateHeader
 
 @Composable
 fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                app: HotelApplication = LocalContext.current.applicationContext as HotelApplication,
                onMenuClick: () -> Unit,
-               onEmptyClick: (Long, String, String) -> Unit
+               onEmptyClick: (Long, String, String, StayMode, Long?) -> Unit
 ) {
     val viewModel: RollViewModel = viewModel(
         factory = RollViewModelFactory(app.repository)
@@ -37,7 +38,8 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                 date = date,
                 onPrevious = viewModel::prevDay,
                 onNext = viewModel::nextDay,
-                onMenuClick = onMenuClick
+                onMenuClick = onMenuClick,
+                viewModel
             )
 
             Spacer(modifier = Modifier.height(8.dp))

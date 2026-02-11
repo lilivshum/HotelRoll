@@ -1,6 +1,7 @@
 package com.example.hotelroll.repository
 
 
+import android.util.Log.e
 import androidx.room.withTransaction
 import com.example.hotelroll.data.dao.ReservationDao
 import com.example.hotelroll.data.dao.StayDao
@@ -24,7 +25,6 @@ class HotelRepository(
     private val roomDao: RoomDao,
     private val manager: HotelManager
 ) {
-
     /** Create reservation and persist */
     suspend fun createReservation(
         resName: String,
@@ -45,6 +45,18 @@ class HotelRepository(
         return reservationDao.insert(reservation)
     }
 
+    // assigned room result class
+    sealed class AssignRoomResult {
+        data class Success(val stayId: Long) : AssignRoomResult()
+        object Overlapping: AssignRoomResult()
+        object ReservationNotFound: AssignRoomResult() // should never happen for now
+        object InvalidNights: AssignRoomResult()
+        object RoomNotFound: AssignRoomResult() // should never happen for now
+    }
+
+    class AssignRoomFailure(val result: AssignRoomResult) : Exception()
+
+
     /** Assign a room if available */
     suspend fun assignRoom(
         reservationId: Long,
@@ -55,23 +67,23 @@ class HotelRepository(
         nights: Int,
         tariff: Double?,
         tariffType: TariffType,
-        notes: String?
-    ): Long {
+        notes: String?,
+        stayName: String?
+    ): AssignRoomResult {
 
         // checks if nights amount is valid (checkOutDate Validation)
         val reservation = reservationDao.getById(reservationId)
-            ?: throw IllegalArgumentException("Reservation not found")
+            ?: return AssignRoomResult.ReservationNotFound
 
-        if(nights > reservation.nights || nights < 1){
-            throw IllegalStateException("Invalid value for room nights stay")
+        if(nights < 1){
+            return AssignRoomResult.InvalidNights
         }
 
         val checkOutDate = checkInDate.plusDays(nights.toLong())
 
         // checks if room exists & capacity is allowed
         val room = roomDao.getByRoomNumber(roomNumber)
-            ?: throw IllegalStateException("Room $roomNumber not found")
-
+            ?: return AssignRoomResult.RoomNotFound
         // although this I can change, sometimes room capacity changes are not met
         // lets not add this for now
 
@@ -86,7 +98,7 @@ class HotelRepository(
             checkOutDate
         )
         if (overlaps.isNotEmpty()) {
-            throw IllegalStateException("Room not available")
+           return AssignRoomResult.Overlapping
         }
 
         // ensures default tariff is used
@@ -101,18 +113,18 @@ class HotelRepository(
             checkOutDate = checkOutDate,
             tariff = finalTariff,
             tariffType = tariffType,
-            notes = notes
-
+            notes = notes,
+            stayName = stayName
         )
 
-        val res = reservationDao.getById(reservationId)
+        stayDao.insert(stay)
 
-
-        return stayDao.insert(stay)
+        return AssignRoomResult.Success(stay.stayId)
     }
 
     // creates an a stay immediately with the reservation information
     // cases when only one room is used
+    // creates stay name the same as reservation name
     /** Atomic create + assign */
     suspend fun createReservationWithStay(
         resName: String,
@@ -124,7 +136,9 @@ class HotelRepository(
         roomNumber: String,
         tariff: Double?,
         tariffType: TariffType,
-    ) {
+        stayName: String?
+    ): AssignRoomResult{
+        return try {
         db.withTransaction {
             val resId = createReservation(
                 resName,
@@ -134,7 +148,7 @@ class HotelRepository(
                 checkInDate,
                 nights
             )
-            assignRoom(
+            when (val res = assignRoom(
                 resId,
                 roomNumber,
                 noGuests,
@@ -143,9 +157,18 @@ class HotelRepository(
                 nights,
                 tariff,
                 tariffType,
-                notes
-            )
+                notes,
+                stayName = stayName,
+            )) {
+                is AssignRoomResult.Success -> res
+                else -> throw AssignRoomFailure(res)
+            }
+
         }
+        } catch (e: AssignRoomFailure){
+            e.result
+        }
+
     }
 
     suspend fun deleteReservation(reservation: Reservation) {
@@ -156,7 +179,7 @@ class HotelRepository(
         stayDao.delete(stay)
     }
 
-    suspend fun getStaysForRoom(
+    suspend fun getStaysPerRoom(
         roomId: Long,
         from: LocalDate,
         to: LocalDate
@@ -193,7 +216,7 @@ class HotelRepository(
     }
 
     // for detail viewing in ui
-    suspend fun getRoomRoll(date: LocalDate): List<RollItem>{
+    suspend fun getRoomRoll(date: LocalDate): Flow<List<RollItem>>{
         return roomDao.getRoll(date = date)
     }
 
@@ -251,6 +274,31 @@ class HotelRepository(
     suspend fun getRoomTariff(id: Long): Double {
         return roomDao.getRoomTariff(id)
     }
+
+    // class for update stay result
+    sealed class StayResult{
+        object Success: StayResult()
+        object Overlapping: StayResult()
+    }
+
+
+    suspend fun updateStay(stay: Stay): StayResult{
+        val overlapping = stayDao.hasOverlap(
+            roomId = stay.roomId,
+            checkIn = stay.checkInDate,
+            checkOut = stay.checkOutDate,
+            excludeStayId = stay.stayId // important when editing
+        )
+
+        return if (overlapping) {
+            StayResult.Overlapping
+        } else {
+            stayDao.update(stay)
+            StayResult.Success
+        }
+    }
+
+
 
 }
 

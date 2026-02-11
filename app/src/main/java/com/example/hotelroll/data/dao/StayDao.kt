@@ -89,4 +89,22 @@ interface StayDao {
         reservationId: Long
     ): List<StayWithRoomNumber>
 
+    // function that checks overlap
+    @Query("""
+SELECT EXISTS(
+    SELECT 1 FROM stays
+    WHERE roomId = :roomId
+    AND stayId != :excludeStayId
+    AND :checkIn < checkOutDate
+    AND :checkOut > checkInDate
+)
+""")
+    suspend fun hasOverlap(
+        roomId: Long,
+        checkIn: LocalDate,
+        checkOut: LocalDate,
+        excludeStayId: Long
+    ): Boolean
+
+
 }

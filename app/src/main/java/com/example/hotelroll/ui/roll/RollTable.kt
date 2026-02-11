@@ -14,13 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import com.example.hotelroll.data.dto.RollItem
+import com.example.hotelroll.ui.navigation.StayMode
 import java.time.LocalDate
 
 
 @Composable
 fun RollTable(rollItems: List<RollItem>,
               onStayClick: (Long, String, String) -> Unit,
-              onEmptyClick: (Long, String, String) -> Unit,
+              onEmptyClick: (Long, String, String, StayMode, Long?) -> Unit,
               date: LocalDate){
     Column(
         modifier = Modifier
@@ -34,7 +35,10 @@ fun RollTable(rollItems: List<RollItem>,
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(rollItems) { item ->
+            items(
+                items = rollItems,
+                key = {it.roomId}
+            ) { item ->
                 RollRow(item, onStayClick, onEmptyClick, date)
             }
         }

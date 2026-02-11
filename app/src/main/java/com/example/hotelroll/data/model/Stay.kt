@@ -27,6 +27,7 @@ data class Stay(
 
     @PrimaryKey(autoGenerate = true)
     val stayId: Long = 0L,
+    val stayName: String? = null,
     val reservationId: Long,
     val roomId: Long,
     val peopleInRoom: Int,

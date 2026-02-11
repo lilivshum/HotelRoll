@@ -11,7 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.example.hotelroll.data.dto.RollItem
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
+import com.example.hotelroll.ui.navigation.StayMode
 import java.time.LocalDate
 
 
@@ -19,7 +21,7 @@ import java.time.LocalDate
 fun RollRow(
     item: RollItem,
     onStayClick: (Long, String, String) -> Unit,
-    onEmptyClick: (Long, String, String) -> Unit,
+    onEmptyClick: (Long, String, String, StayMode, Long?) -> Unit,
     date: LocalDate
 ) {
     Row(
@@ -28,13 +30,19 @@ fun RollRow(
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .clickable {
                 if(item.stayId != null) {
-                    onStayClick(item.stayId, item.roomNumber, item.reservationName?:"")
+                    if(item.stayStatus == StayStatus.CONFIRMED){
+                        onStayClick(item.stayId, item.roomNumber, item.reservationName?:"")
+                    } else {
+                        onEmptyClick(item.roomId, item.roomNumber, date.toString(), StayMode.EDIT, item.stayId)
+                    }
 
                 } else {
                     onEmptyClick(
                         item.roomId,
                         item.roomNumber,
-                        date.toString()
+                        date.toString(),
+                        StayMode.CREATE,
+                        null
                     )
                 }
             },
@@ -56,21 +64,23 @@ fun RollRow(
 
         // tariff is default for each room as well so each room will always have a default
         // pax is treated as a measure to see if a room has been set or not .. good practice? idk
-        var pax = ""
-        var tariffString = ""
-        item.peopleInRoom?.let {
-            pax = item.peopleInRoom.toString()
-            tariffString = "$${"%.2f".format(item.tariff)}"
-
-           if(item.tariffType == TariffType.NET) {
-                tariffString += ".net"
+        val pax = item.peopleInRoom?.let {
+            if ((item.kidsInRoom ?: 0) > 0) {
+                "${item.peopleInRoom}+${item.kidsInRoom}"
             } else {
-                tariffString += "+tax"
+                item.peopleInRoom.toString()
             }
-            if((item.kidsInRoom?: 0 )> 0 ){
-                pax += "+" + item.kidsInRoom.toString()
+        } ?: ""
+
+        val tariffString = item.peopleInRoom?.let {
+            val base = "$${"%.2f".format(item.tariff)}"
+            if (item.tariffType == TariffType.NET) {
+                "$base.net"
+            } else {
+                "$base+tax"
             }
-        }
+        } ?: ""
+
         Text(
             text = pax,
             modifier = Modifier.weight(RollColumns.PEOPLE),

@@ -23,12 +23,16 @@ class  RollViewModel(
 
     val roll: StateFlow<List<RollItem>> =
         _date.flatMapLatest { date ->
-            flow { emit(repository.getRoomRoll(date)) }
+            repository.getRoomRoll(date)
         }.stateIn(
             viewModelScope,
             SharingStarted.Companion.WhileSubscribed(5000),
             emptyList()
         )
+
+    fun onDateChange(newDate: LocalDate){
+        _date.value = newDate
+    }
 
     fun nextDay() { _date.value = _date.value.plusDays(1) }
     fun prevDay() { _date.value = _date.value.minusDays(1) }

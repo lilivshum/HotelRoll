@@ -22,6 +22,12 @@ import com.example.hotelroll.ui.stay.StayDetailViewModel
 import com.example.hotelroll.ui.stay.StayDetailViewModelFactory
 import java.time.LocalDate
 
+// created a stay mode that determines how the stay is being viewed
+enum class StayMode{
+    CREATE,
+    EDIT
+}
+
 @Composable
 fun HotelNavGraph(
     modifier: Modifier = Modifier,
@@ -37,14 +43,16 @@ fun HotelNavGraph(
     ) {
         composable(HotelRoute.Roll.route) {
             RollScreen(
+                // for a confirmed stay only (should changed the name to onConfirmedStayClick)
                 onStayClick = { stayId, roomNumber, reservationName->
-                    navController.navigate(HotelRoute.StayDetail.createRoute(stayId, roomNumber, reservationName))
+                    navController.navigate(
+                        HotelRoute.StayDetail.createRoute(stayId, roomNumber, reservationName))
                 },
                 onMenuClick = onMenuClick,
 
-                onEmptyClick = {roomId, roomNumber, date ->
+                onEmptyClick = {roomId, roomNumber, date, mode, stayId->
                     navController.navigate(
-                        HotelRoute.CreateStay.createRoute(roomId, roomNumber, date)
+                        HotelRoute.CreateStay.createRoute(roomId, roomNumber, date, mode, stayId)
                     )
                 }
             )
@@ -119,7 +127,15 @@ fun HotelNavGraph(
                 },
                 navArgument("date") {
                     type = NavType.StringType
+                },
+                navArgument("mode"){
+                    type = NavType.StringType
+                },
+                navArgument("stayId"){
+                    type = NavType.StringType
+                    nullable = true
                 }
+
             )
         ) { backStackEntry ->
 

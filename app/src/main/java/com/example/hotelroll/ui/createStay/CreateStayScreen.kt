@@ -1,5 +1,6 @@
 package com.example.hotelroll.ui.createStay
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.data.model.TariffType
+import com.example.hotelroll.ui.createRes.DateField
+import com.example.hotelroll.ui.navigation.StayMode
+import com.example.hotelroll.ui.utilities.AppDatePickerDialog
+import java.time.format.DateTimeFormatter
+
+private val dateFormatter =
+    DateTimeFormatter.ofPattern("MMM dd, yyyy")
 
 @Composable
 private fun TariffButton(
@@ -79,6 +91,10 @@ fun CreateStayScreen(
     )
 
     val roomNumber = viewModel.roomNumber
+    val mode = viewModel.stayMode // observation mode
+    val resName = viewModel.resName
+
+    var activeDateField by remember { mutableStateOf<DateField?>(null) }
 
     Column(
         modifier = Modifier
@@ -87,14 +103,26 @@ fun CreateStayScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Create Stay – Room $roomNumber",
+            text = "Room $roomNumber",
             style = MaterialTheme.typography.headlineSmall
         )
 
+        if(mode == StayMode.CREATE){
+            OutlinedTextField(
+                value = viewModel.resName,
+                onValueChange = viewModel::onResNameChange,
+                label = { Text("Reservation name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Text("Reservation Name: $resName",
+                style = MaterialTheme.typography.headlineSmall)
+        }
+
         OutlinedTextField(
-            value = viewModel.resName,
-            onValueChange = viewModel::onResNameChange,
-            label = { Text("Reservation name") },
+            value = viewModel.stayName ?: "",
+            onValueChange = viewModel::onStayNameChange,
+            label = {Text("Guest Name")},
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -112,12 +140,37 @@ fun CreateStayScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        // Check-in date field
         OutlinedTextField(
-            value = viewModel.nights.toString(),
-            onValueChange = { it.toIntOrNull()?.let(viewModel::onNightsChange) },
-            label = { Text("Nights") },
-            modifier = Modifier.fillMaxWidth()
+            value = viewModel.checkInDate.format(dateFormatter),
+            onValueChange = {},
+            readOnly = true,
+            enabled = false,
+            label = { Text("Check-in date") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { activeDateField = DateField.CHECK_IN }
         )
+
+        // Checkout
+        OutlinedTextField(
+            value = viewModel.checkOutDate.format(dateFormatter),
+            onValueChange = {},
+            readOnly = true,
+            enabled = false,
+            label = { Text("Check-out date") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { activeDateField = DateField.CHECK_OUT }
+        )
+
+        Text(text = "Nights: ${viewModel.nights}")
+//        OutlinedTextField(
+//            value = viewModel.nights.toString(),
+//            onValueChange = { it.toIntOrNull()?.let(viewModel::onNightsChange) },
+//            label = { Text("Nights") },
+//            modifier = Modifier.fillMaxWidth()
+//        )
 
         OutlinedTextField(
             value = viewModel.tariff.toString(),
@@ -157,6 +210,27 @@ fun CreateStayScreen(
                 onSaved()} }) {
                 Text("Save")
             }
+        }
+
+        activeDateField?.let { field ->
+            val initialDate = when (field) {
+                DateField.CHECK_IN -> viewModel.checkInDate
+                DateField.CHECK_OUT -> viewModel.checkOutDate
+            }
+
+            AppDatePickerDialog(
+                initialDate = initialDate,
+                onDateSelected = { selectedDate ->
+                    when (field) {
+                        DateField.CHECK_IN ->
+                            viewModel.onCheckInDateChange(selectedDate)
+
+                        DateField.CHECK_OUT ->
+                            viewModel.onCheckOutDateChange(selectedDate)
+                    }
+                },
+                onDismiss = { activeDateField = null }
+            )
         }
     }
 }

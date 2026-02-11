@@ -29,16 +29,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
-import com.example.hotelroll.ui.utilities.millisToLocalDate
-import java.time.Instant
-import java.time.ZoneId
+import com.example.hotelroll.ui.utilities.AppDatePickerDialog
 import java.time.format.DateTimeFormatter
 
 private val dateFormatter =
@@ -185,43 +182,21 @@ fun CreateResScreen (
             DateField.CHECK_OUT -> checkOutDate
         }
 
-        val pickerState = rememberDatePickerState(
-            initialSelectedDateMillis = initialDate
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
+        AppDatePickerDialog(
+            initialDate = initialDate,
+            onDateSelected = { selectedDate ->
+                when (field) {
+                    DateField.CHECK_IN ->
+                        viewModel.onCheckInDateChange(selectedDate)
+
+                    DateField.CHECK_OUT ->
+                        viewModel.onCheckOutDateChange(selectedDate)
+                }
+            },
+            onDismiss = { activeDateField = null }
         )
 
-        DatePickerDialog(
-            onDismissRequest = { activeDateField = null },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pickerState.selectedDateMillis?.let { millis ->
-                            val selectedDate = millisToLocalDate(millis)
-                            when (field) {
-                                DateField.CHECK_IN ->
-                                    viewModel.onCheckInDateChange(selectedDate)
 
-                                DateField.CHECK_OUT ->
-                                    viewModel.onCheckOutDateChange(selectedDate)
-                            }
-                        }
-                        activeDateField = null
-                    }
-                ) { Text("OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = { activeDateField = null }) {
-                    Text("Cancel")
-                }
-            }
-        ) {
-            DatePicker(
-                state = pickerState,
-                showModeToggle = false
-            )
-        }
     }
 
 }
