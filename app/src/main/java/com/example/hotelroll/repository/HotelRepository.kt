@@ -140,8 +140,12 @@ class HotelRepository(
     ): AssignRoomResult{
         return try {
         db.withTransaction {
+            var realResName = "Reservation" // ensures blank res is still visible
+            if(resName != ""){
+                realResName = resName
+            }
             val resId = createReservation(
-                resName,
+                realResName,
                 noGuests,
                 noKids,
                 notes,
@@ -290,6 +294,8 @@ class HotelRepository(
             excludeStayId = stay.stayId // important when editing
         )
 
+        // nights cannot be 0
+        // reservation cannot be changed -- only guest names
         return if (overlapping) {
             StayResult.Overlapping
         } else {
@@ -297,6 +303,15 @@ class HotelRepository(
             StayResult.Success
         }
     }
+
+    suspend fun searchReservations(query: String): Flow<List<Reservation>>{
+        return reservationDao.searchReservations(query)
+    }
+
+    suspend fun getExactReservation(name:String): Reservation?{
+        return reservationDao.getExactReservation(name)
+    }
+
 
 
 

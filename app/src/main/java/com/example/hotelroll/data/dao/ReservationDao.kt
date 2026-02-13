@@ -41,4 +41,19 @@ interface ReservationDao {
 
     @Query("SELECT COUNT(*) FROM reservations")
     suspend fun countReservations(): Int
+
+    @Query("""
+        SELECT * from reservations
+        WHERE   LOWER(resName) LIKE '%' || LOWER(:query) || '%'
+        ORDER BY resName ASC
+    """
+    )
+    fun searchReservations(query: String): Flow<List<Reservation>>
+
+    @Query("""
+    SELECT * FROM reservations
+    WHERE LOWER(resName) = LOWER(:name)
+    LIMIT 1
+""")
+    suspend fun getExactReservation(name: String): Reservation?
 }

@@ -9,17 +9,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -74,6 +81,50 @@ fun TariffTypeSelector(
     }
 }
 
+// for reservation drop down matching
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReservationField(viewModel: CreateStayViewModel) {
+
+    val name by viewModel.reservationName.collectAsState()
+    val matches by viewModel.matchingReservations.collectAsState()
+
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded && matches.isNotEmpty(),
+        onExpandedChange = { expanded = it }
+    ) {
+
+        TextField(
+            value = name,
+            onValueChange = {
+                viewModel.onNameChange(it)
+                expanded = true
+            },
+            label = { Text("Reservation Name") },
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded && matches.isNotEmpty(),
+            onDismissRequest = { expanded = false }
+        ) {
+            matches.forEach { reservation ->
+                DropdownMenuItem(
+                    text = { Text(reservation.resName) },
+                    onClick = {
+                        viewModel.onReservationSelected(reservation)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
 @Composable
 fun CreateStayScreen(
     onCancel: () -> Unit,
@@ -92,7 +143,7 @@ fun CreateStayScreen(
 
     val roomNumber = viewModel.roomNumber
     val mode = viewModel.stayMode // observation mode
-    val resName = viewModel.resName
+    val resName = viewModel.reservationName.value
 
     var activeDateField by remember { mutableStateOf<DateField?>(null) }
 
@@ -108,12 +159,13 @@ fun CreateStayScreen(
         )
 
         if(mode == StayMode.CREATE){
-            OutlinedTextField(
-                value = viewModel.resName,
-                onValueChange = viewModel::onResNameChange,
-                label = { Text("Reservation name") },
-                modifier = Modifier.fillMaxWidth()
-            )
+//            OutlinedTextField(
+//                value = viewModel.resName,
+//                onValueChange = viewModel::onResNameChange,
+//                label = { Text("Reservation name") },
+//                modifier = Modifier.fillMaxWidth()
+//            )
+            ReservationField(viewModel)
         } else {
             Text("Reservation Name: $resName",
                 style = MaterialTheme.typography.headlineSmall)

@@ -10,10 +10,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
+import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.ui.navigation.StayMode
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import java.time.temporal.ChronoUnit
 
 
@@ -33,8 +44,6 @@ class CreateStayViewModel(
 
 
     val stayId: Long? = savedStateHandle.get<String>("stayId")?.toLongOrNull()
-
-
 
     var resName by mutableStateOf("")
         private set
@@ -82,6 +91,31 @@ class CreateStayViewModel(
     var stayStatus by mutableStateOf(StayStatus.PENDING)
         private set
 
+    // for reservation completion
+    private val _selectedReservation = MutableStateFlow<Reservation?>(null)
+    val selectedReservation: StateFlow<Reservation?> = _selectedReservation
+
+    private val _reservationName = MutableStateFlow("")
+    val reservationName: StateFlow<String> = _reservationName
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val matchingReservations: StateFlow<List<Reservation>> =
+        _reservationName
+            .debounce(300) // optional but recommended
+            .distinctUntilChanged()
+            .flatMapLatest { query ->
+                if (query.isBlank()) {
+                    flowOf(emptyList())
+                } else {
+                    repository.searchReservations(query)
+                }
+            }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                emptyList()
+            )
+
     init {
         if(stayMode == StayMode.EDIT) {
             viewModelScope.launch {
@@ -91,7 +125,7 @@ class CreateStayViewModel(
                     return@launch
                 }
                 val res = repository.getResById(stay.reservationId)
-                resName = res!!.resName // assumes reservation is non-null
+                _reservationName.value = res!!.resName // assumes reservation is non-null
                 hydrate(stay)
 
             }
@@ -153,9 +187,35 @@ class CreateStayViewModel(
         tariffType = type
     }
 
+    // resName Change
+    fun onNameChange(newName: String) {
+        _reservationName.value = newName
+        _selectedReservation.value = null
+    }
+
+    fun onReservationSelected(reservation: Reservation) {
+        _selectedReservation.value = reservation
+        _reservationName.value = reservation.resName
+    }
+
+    suspend fun getReservation(): Reservation? {
+        val currentName = reservationName.value.trim()
+
+        // If already selected
+        selectedReservation.value?.let { return it }
+
+        // Check exact match
+        val existing = repository.getExactReservation(currentName)
+        if (existing != null) return existing
+
+        // Otherwise return null (no res selected)
+        return null
+    }
+
+
 
     fun reset() {
-        resName = ""
+        _reservationName.value = ""
         peopleInRoom = 1
         kidsInRoom = 0
         nights = 1
@@ -167,20 +227,37 @@ class CreateStayViewModel(
 
     fun save(onSuccess: () -> Unit) {
         viewModelScope.launch {
+            val reservation = getReservation() // null if no reservation is selected (new one is created)
                 when(stayMode) {
                     StayMode.CREATE -> {
                         when(
-                           repository.createReservationWithStay(
-                                resName,
-                                peopleInRoom,
-                                kidsInRoom,
-                                notes,
-                                checkInDate,
-                                nights,
-                                roomNumber,
-                                tariff,
-                                tariffType,
-                                stayName)
+                            if(reservation == null) {
+                                repository.createReservationWithStay(
+                                    reservationName.value,
+                                    peopleInRoom,
+                                    kidsInRoom,
+                                    notes,
+                                    checkInDate,
+                                    nights,
+                                    roomNumber,
+                                    tariff,
+                                    tariffType,
+                                    stayName
+                                )
+                            } else {
+                                repository.assignRoom( // assigns room to existing reservation
+                                    reservation.id,
+                                    roomNumber,
+                                    peopleInRoom,
+                                    kidsInRoom,
+                                    checkInDate,
+                                    nights,
+                                    tariff,
+                                    tariffType,
+                                    notes,
+                                    stayName
+                                )
+                            }
                         ){
                             is HotelRepository.AssignRoomResult.Success -> {
                                 onSuccess()
