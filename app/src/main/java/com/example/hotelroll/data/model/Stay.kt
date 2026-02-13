@@ -10,6 +10,12 @@ enum class TariffType {
     WITH_TAX
 }
 
+enum class Currency {
+    USD,
+    CRC
+}
+
+
 @Entity(
     tableName = "stays",
     foreignKeys = [
@@ -37,7 +43,8 @@ data class Stay(
     val status: StayStatus = StayStatus.PENDING,// pending whether guests have confirmed / arrived
     val tariff: Double,
     val tariffType: TariffType = TariffType.NET,
-    val notes: String? = null
+    val notes: String? = null,
+    val currency: Currency = Currency.CRC
 
 )
 

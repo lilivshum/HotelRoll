@@ -45,7 +45,8 @@ class HotelManager {
         tariff: Double,
         tariffType: TariffType,
         notes: String?,
-        stayName: String?
+        stayName: String?,
+        currency: Currency
     ): Stay {
         require(checkInDate < checkOutDate) {
             "Error: checkout must be after check-in"
@@ -71,8 +72,8 @@ class HotelManager {
             tariffType = tariffType,
             notes = notes,
             stayName = stayName,
-            status = StayStatus.PENDING
-
+            status = StayStatus.PENDING,
+            currency = currency
         )
     }
 

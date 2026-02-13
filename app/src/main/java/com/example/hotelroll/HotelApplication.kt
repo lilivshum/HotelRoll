@@ -3,6 +3,7 @@ package com.example.hotelroll
 
 import android.app.Application
 import com.example.hotelroll.data.database.HotelDatabase
+import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.data.seed.DEFAULT_ROOMS
@@ -72,7 +73,8 @@ class HotelApplication : Application() {
                 45.0,
                 notes = "",
                 tariffType = TariffType.NET,
-                stayName = "Alice 1"
+                stayName = "Alice 1",
+                currency = Currency.USD
             )
 
             repository.assignRoom(
@@ -85,7 +87,8 @@ class HotelApplication : Application() {
                 45.0,
                 notes = "",
                 tariffType = TariffType.NET,
-                stayName = "Alice 2"
+                stayName = "Alice 2",
+                currency = Currency.USD
             )
 
 
@@ -110,7 +113,8 @@ class HotelApplication : Application() {
                 70.0,
                 notes = "",
                 tariffType = TariffType.WITH_TAX,
-                stayName =  null
+                stayName =  null,
+                currency = Currency.USD
             )
         }
     }

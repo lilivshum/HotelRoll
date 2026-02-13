@@ -14,6 +14,7 @@ import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import java.time.LocalDate
 import com.example.hotelroll.data.dto.RollItem
+import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.TariffType
 import kotlinx.coroutines.flow.Flow
 import com.example.hotelroll.ui.utilities.StayUi
@@ -68,7 +69,8 @@ class HotelRepository(
         tariff: Double?,
         tariffType: TariffType,
         notes: String?,
-        stayName: String?
+        stayName: String?,
+        currency: Currency
     ): AssignRoomResult {
 
         // checks if nights amount is valid (checkOutDate Validation)
@@ -114,7 +116,8 @@ class HotelRepository(
             tariff = finalTariff,
             tariffType = tariffType,
             notes = notes,
-            stayName = stayName
+            stayName = stayName,
+            currency = currency
         )
 
         stayDao.insert(stay)
@@ -136,7 +139,8 @@ class HotelRepository(
         roomNumber: String,
         tariff: Double?,
         tariffType: TariffType,
-        stayName: String?
+        stayName: String?,
+        currency: Currency
     ): AssignRoomResult{
         return try {
         db.withTransaction {
@@ -163,6 +167,7 @@ class HotelRepository(
                 tariffType,
                 notes,
                 stayName = stayName,
+                currency
             )) {
                 is AssignRoomResult.Success -> res
                 else -> throw AssignRoomFailure(res)

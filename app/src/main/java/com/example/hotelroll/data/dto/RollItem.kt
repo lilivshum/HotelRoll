@@ -1,5 +1,6 @@
 package com.example.hotelroll.data.dto
 
+import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 
@@ -13,5 +14,6 @@ class RollItem (
     val kidsInRoom: Int?,
     val tariff: Double,
     val tariffType: TariffType?,
-    val stayStatus: StayStatus?
+    val stayStatus: StayStatus?,
+    val currency: Currency?
 )

@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.example.hotelroll.data.dto.RollItem
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.ui.navigation.StayMode
@@ -72,8 +73,15 @@ fun RollRow(
             }
         } ?: ""
 
+
         val tariffString = item.peopleInRoom?.let {
-            val base = "$${"%.2f".format(item.tariff)}"
+            val currencystring = when(item.currency){
+                Currency.USD -> "$"
+                Currency.CRC -> "₡"
+                else -> "$"
+            }
+
+            val base = "$currencystring${"%.2f".format(item.tariff)}"
             if (item.tariffType == TariffType.NET) {
                 "$base.net"
             } else {

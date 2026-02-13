@@ -3,6 +3,7 @@ package com.example.hotelroll.data.database
 // file that helps with type conversions from domain to database
 
 import androidx.room.TypeConverter
+import com.example.hotelroll.data.model.Currency
 import java.time.LocalDate
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
@@ -32,6 +33,16 @@ class Converters {
     @TypeConverter
     fun toTariffType(value: String?): TariffType? {
         return value?.let { TariffType.valueOf(it) }
+    }
+
+    @TypeConverter
+    fun fromCurrency(value: Currency?): String? {
+        return value?.name
+    }
+
+    @TypeConverter
+    fun toCurrency(value: String?): Currency? {
+        return value?.let { Currency.valueOf(it) }
     }
 
 }

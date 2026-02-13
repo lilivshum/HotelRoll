@@ -56,7 +56,8 @@ interface RoomDao {
                COALESCE(s.tariff, r.tariff) AS tariff, 
                s.stayId AS stayId, 
                s.tariffType AS tariffType, 
-               s.status AS stayStatus
+               s.status AS stayStatus, 
+               s.currency AS currency
         FROM rooms r
         LEFT JOIN stays s ON s.roomId = r.roomId
             AND :date >= s.checkInDate

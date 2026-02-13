@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.type
@@ -31,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
+import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.ui.createRes.DateField
 import com.example.hotelroll.ui.navigation.StayMode
@@ -124,6 +126,28 @@ fun ReservationField(viewModel: CreateStayViewModel) {
     }
 }
 
+// for currency button toggle
+@Composable
+fun CurrencySelector(
+    selected: Currency,
+    onSelect: (Currency) -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        TariffButton(
+            text = "USD",
+            selected = selected == Currency.USD,
+            onClick = { onSelect(Currency.USD) }
+        )
+
+        TariffButton(
+            text = "CRC",
+            selected = selected == Currency.CRC,
+            onClick = { onSelect(Currency.CRC) }
+        )
+    }
+}
 
 @Composable
 fun CreateStayScreen(
@@ -231,10 +255,21 @@ fun CreateStayScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        TariffTypeSelector(
-            selected = viewModel.tariffType,
-            onSelect = viewModel::onTariffTypeChange
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TariffTypeSelector(
+                selected = viewModel.tariffType,
+                onSelect = viewModel::onTariffTypeChange
+            )
+
+            CurrencySelector(
+                selected = viewModel.currency,
+                onSelect = viewModel::onCurrencyChange
+            )
+        }
+
 
         OutlinedTextField(
             value = viewModel.notes?: "",

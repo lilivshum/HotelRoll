@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import java.time.temporal.ChronoUnit
-
+import com.example.hotelroll.data.model.Currency
 
 class CreateStayViewModel(
     private val repository: HotelRepository,
@@ -116,6 +116,11 @@ class CreateStayViewModel(
                 emptyList()
             )
 
+    // currency change value
+    var currency by mutableStateOf(Currency.USD)
+        private set
+
+
     init {
         if(stayMode == StayMode.EDIT) {
             viewModelScope.launch {
@@ -149,6 +154,7 @@ class CreateStayViewModel(
             tariffType = stay.tariffType
             resId = stay.reservationId
             stayStatus = stay.status
+            currency = stay.currency
     }
 
     fun onResNameChange(v: String) { resName = v }
@@ -212,7 +218,9 @@ class CreateStayViewModel(
         return null
     }
 
-
+    fun onCurrencyChange(value: Currency) {
+        currency = value
+    }
 
     fun reset() {
         _reservationName.value = ""
@@ -223,6 +231,7 @@ class CreateStayViewModel(
         tariff = tariff
         errorMessage = null
         tariffType = TariffType.NET
+        currency = Currency.CRC
     }
 
     fun save(onSuccess: () -> Unit) {
@@ -242,7 +251,8 @@ class CreateStayViewModel(
                                     roomNumber,
                                     tariff,
                                     tariffType,
-                                    stayName
+                                    stayName,
+                                    currency
                                 )
                             } else {
                                 repository.assignRoom( // assigns room to existing reservation
@@ -255,7 +265,8 @@ class CreateStayViewModel(
                                     tariff,
                                     tariffType,
                                     notes,
-                                    stayName
+                                    stayName,
+                                    currency
                                 )
                             }
                         ){
@@ -288,7 +299,8 @@ class CreateStayViewModel(
                             tariffType = tariffType,
                             notes = notes,
                             stayName = stayName,
-                            status = stayStatus
+                            status = stayStatus,
+                            currency = currency
                         )
                         when (repository.updateStay(stay)){
 
