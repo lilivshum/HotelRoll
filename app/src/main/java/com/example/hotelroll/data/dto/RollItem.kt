@@ -15,5 +15,5 @@ class RollItem (
     val tariff: Double,
     val tariffType: TariffType?,
     val stayStatus: StayStatus?,
-    val currency: Currency?
+    val currency: Currency?,
 )

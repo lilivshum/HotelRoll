@@ -1,7 +1,9 @@
 package com.example.hotelroll.ui.roll
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -10,7 +12,9 @@ import androidx.compose.ui.unit.dp
 
 import com.example.hotelroll.data.dto.RollItem
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
@@ -25,10 +29,25 @@ fun RollRow(
     onEmptyClick: (Long, String, String, StayMode, Long?) -> Unit,
     date: LocalDate
 ) {
+    val backgroundColor =
+        if (item.stayStatus == StayStatus.CONFIRMED)
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+        else
+            Color.Transparent
+
+    val textStyle =
+        if (item.stayStatus == StayStatus.CONFIRMED)
+            MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+        else
+            MaterialTheme.typography.bodyLarge
+
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
+            .background(backgroundColor)
+            .clip(RoundedCornerShape(8.dp))
             .clickable {
                 if(item.stayId != null) {
                     if(item.stayStatus == StayStatus.CONFIRMED){
@@ -52,7 +71,7 @@ fun RollRow(
         Text(
             text = item.roomNumber,
             modifier = Modifier.weight(RollColumns.ROOM),
-            style = MaterialTheme.typography.bodyLarge
+            style = textStyle
         )
 
         Text(

@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import com.example.hotelroll.data.model.Reservation
@@ -232,6 +233,28 @@ class CreateStayViewModel(
         errorMessage = null
         tariffType = TariffType.NET
         currency = Currency.CRC
+    }
+
+    fun deleteStay(onDone: () -> Unit = {}){
+        viewModelScope.launch {
+            try {
+                repository.deleteStay(stayId!!)
+                onDone()
+            } catch (e: Exception) {
+                errorMessage = e.message
+            }
+        }
+    }
+
+    fun confirmStay(onDone: () -> Unit = {}){
+        viewModelScope.launch {
+            try{
+                repository.confirmStay(stayId!!)
+                onDone()
+            } catch (e: Exception){
+                errorMessage = e.message
+            }
+        }
     }
 
     fun save(onSuccess: () -> Unit) {

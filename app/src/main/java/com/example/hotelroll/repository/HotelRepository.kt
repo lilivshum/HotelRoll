@@ -184,8 +184,9 @@ class HotelRepository(
         reservationDao.delete(reservation)
     }
 
-    suspend fun deleteStay(stay: Stay) {
-        stayDao.delete(stay)
+    suspend fun deleteStay(stayId: Long) {
+        val stay = stayDao.getById(stayId)
+        stay?.let { stayDao.delete(stay) }
     }
 
     suspend fun getStaysPerRoom(
@@ -225,7 +226,7 @@ class HotelRepository(
     }
 
     // for detail viewing in ui
-    suspend fun getRoomRoll(date: LocalDate): Flow<List<RollItem>>{
+    fun getRoomRoll(date: LocalDate): Flow<List<RollItem>>{
         return roomDao.getRoll(date = date)
     }
 

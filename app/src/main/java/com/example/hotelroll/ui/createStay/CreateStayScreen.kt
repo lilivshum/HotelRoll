@@ -1,23 +1,42 @@
 package com.example.hotelroll.ui.createStay
 
+import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddTask
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.data.model.Currency
+import com.example.hotelroll.data.model.Stay
+import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.ui.createRes.DateField
 import com.example.hotelroll.ui.navigation.StayMode
@@ -95,7 +116,8 @@ fun ReservationField(viewModel: CreateStayViewModel) {
 
     ExposedDropdownMenuBox(
         expanded = expanded && matches.isNotEmpty(),
-        onExpandedChange = { expanded = it }
+        onExpandedChange = { expanded = it },
+        modifier = Modifier.fillMaxWidth()
     ) {
 
         TextField(
@@ -149,6 +171,7 @@ fun CurrencySelector(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateStayScreen(
     onCancel: () -> Unit,
@@ -167,80 +190,137 @@ fun CreateStayScreen(
 
     val roomNumber = viewModel.roomNumber
     val mode = viewModel.stayMode // observation mode
-    val resName = viewModel.reservationName.value
+
 
     var activeDateField by remember { mutableStateOf<DateField?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Room $roomNumber",
-            style = MaterialTheme.typography.headlineSmall
-        )
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
-        if(mode == StayMode.CREATE){
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Room $roomNumber",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        viewModel.reset()
+                        onCancel()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+
+                actions = {
+                    if (mode == StayMode.EDIT) {
+                        IconButton(
+                            onClick = { showDeleteDialog = true }
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                viewModel.confirmStay {
+                                    viewModel.reset()
+                                    onSaved()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.AddTask,
+                                contentDescription = "Save",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        // modify mode option needed
+                    }
+                }
+            )
+
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (mode == StayMode.CREATE) {
 //            OutlinedTextField(
 //                value = viewModel.resName,
 //                onValueChange = viewModel::onResNameChange,
 //                label = { Text("Reservation name") },
 //                modifier = Modifier.fillMaxWidth()
 //            )
-            ReservationField(viewModel)
-        } else {
-            Text("Reservation Name: $resName",
-                style = MaterialTheme.typography.headlineSmall)
-        }
+                ReservationField(viewModel)
+            } else {
+                Text(
+                    "Reservation: ${viewModel.reservationName.value}",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
 
-        OutlinedTextField(
-            value = viewModel.stayName ?: "",
-            onValueChange = viewModel::onStayNameChange,
-            label = {Text("Guest Name")},
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = viewModel.stayName ?: "",
+                onValueChange = viewModel::onStayNameChange,
+                label = { Text("Guest Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        OutlinedTextField(
-            value = viewModel.peopleInRoom.toString(),
-            onValueChange = { it.toIntOrNull()?.let(viewModel::onPeopleInRoomChange) },
-            label = { Text("Adults") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = viewModel.peopleInRoom.toString(),
+                onValueChange = { it.toIntOrNull()?.let(viewModel::onPeopleInRoomChange) },
+                label = { Text("Adults") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        OutlinedTextField(
-            value = viewModel.kidsInRoom.toString(),
-            onValueChange = { it.toIntOrNull()?.let(viewModel::onKidsInRoomChange) },
-            label = { Text("Kids") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = viewModel.kidsInRoom.toString(),
+                onValueChange = { it.toIntOrNull()?.let(viewModel::onKidsInRoomChange) },
+                label = { Text("Kids") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        // Check-in date field
-        OutlinedTextField(
-            value = viewModel.checkInDate.format(dateFormatter),
-            onValueChange = {},
-            readOnly = true,
-            enabled = false,
-            label = { Text("Check-in date") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { activeDateField = DateField.CHECK_IN }
-        )
+            // Check-in date field
+            OutlinedTextField(
+                value = viewModel.checkInDate.format(dateFormatter),
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                label = { Text("Check-in date") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { activeDateField = DateField.CHECK_IN }
+            )
 
-        // Checkout
-        OutlinedTextField(
-            value = viewModel.checkOutDate.format(dateFormatter),
-            onValueChange = {},
-            readOnly = true,
-            enabled = false,
-            label = { Text("Check-out date") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { activeDateField = DateField.CHECK_OUT }
-        )
+            // Checkout
+            OutlinedTextField(
+                value = viewModel.checkOutDate.format(dateFormatter),
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                label = { Text("Check-out date") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { activeDateField = DateField.CHECK_OUT }
+            )
 
-        Text(text = "Nights: ${viewModel.nights}")
+            Text(text = "Nights: ${viewModel.nights}")
 //        OutlinedTextField(
 //            value = viewModel.nights.toString(),
 //            onValueChange = { it.toIntOrNull()?.let(viewModel::onNightsChange) },
@@ -248,76 +328,150 @@ fun CreateStayScreen(
 //            modifier = Modifier.fillMaxWidth()
 //        )
 
-        OutlinedTextField(
-            value = viewModel.tariff.toString(),
-            onValueChange = { it.toDoubleOrNull()?.let(viewModel::onTariffChange) },
-            label = { Text("Rate") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TariffTypeSelector(
-                selected = viewModel.tariffType,
-                onSelect = viewModel::onTariffTypeChange
+            OutlinedTextField(
+                value = viewModel.tariff.toString(),
+                onValueChange = { it.toDoubleOrNull()?.let(viewModel::onTariffChange) },
+                label = { Text("Rate") },
+                modifier = Modifier.fillMaxWidth()
             )
 
-            CurrencySelector(
-                selected = viewModel.currency,
-                onSelect = viewModel::onCurrencyChange
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TariffTypeSelector(
+                    selected = viewModel.tariffType,
+                    onSelect = viewModel::onTariffTypeChange
+                )
+
+                CurrencySelector(
+                    selected = viewModel.currency,
+                    onSelect = viewModel::onCurrencyChange
+                )
+            }
+
+
+            OutlinedTextField(
+                value = viewModel.notes ?: "",
+                onValueChange = viewModel::onNotesChange,
+                label = { Text("Notes") },
+                modifier = Modifier.fillMaxWidth()
             )
-        }
 
-
-        OutlinedTextField(
-            value = viewModel.notes?: "",
-            onValueChange = viewModel::onNotesChange,
-            label = { Text("Notes") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        viewModel.errorMessage?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(onClick = {
-                viewModel.reset()
-                onCancel()
-            }) {
-                Text("Cancel")
+            viewModel.errorMessage?.let {
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
 
-            Button(onClick = { viewModel.save{
-                viewModel.reset()
-                onSaved()} }) {
-                Text("Save")
-            }
-        }
-
-        activeDateField?.let { field ->
-            val initialDate = when (field) {
-                DateField.CHECK_IN -> viewModel.checkInDate
-                DateField.CHECK_OUT -> viewModel.checkOutDate
-            }
-
-            AppDatePickerDialog(
-                initialDate = initialDate,
-                onDateSelected = { selectedDate ->
-                    when (field) {
-                        DateField.CHECK_IN ->
-                            viewModel.onCheckInDateChange(selectedDate)
-
-                        DateField.CHECK_OUT ->
-                            viewModel.onCheckOutDateChange(selectedDate)
+            Button(
+                onClick = {
+                    if (mode == StayMode.CREATE) {
+                        viewModel.save {
+                            onSaved()
+                        }
+                    } else {
+                        viewModel.save {
+                            viewModel.reset()
+                            onSaved()
+                        }
                     }
-                },
-                onDismiss = { activeDateField = null }
-            )
+                }) {
+                Text(
+                    if (mode == StayMode.CREATE)
+                        "Create Stay"
+                    else
+                        "Save Changes"
+                )
+            }
+
+//            if (mode == StayMode.EDIT) {
+//
+//                Spacer(modifier = Modifier.height(8.dp))
+//
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+//                ) {
+//
+//                    OutlinedButton(
+//                        onClick = { showDeleteDialog = true },
+//                        colors = ButtonDefaults.outlinedButtonColors(
+//                            contentColor = MaterialTheme.colorScheme.error
+//                        ),
+//                        border = BorderStroke(
+//                            1.dp,
+//                            MaterialTheme.colorScheme.error
+//                        ),
+//                        modifier = Modifier.weight(1f)
+//                    ) {
+//                        Text("Delete")
+//                    }
+//
+//                    Button(
+//                        onClick = {
+//                            if (viewModel.stayStatus == StayStatus.CONFIRMED) {
+//                                // have to add later
+//                                Log.d("CreateScreen", "Modify mode on")
+//                            } else {
+//                                viewModel.confirmStay {
+//                                    onSaved()
+//                                }
+//                            }
+//                        },
+//                        modifier = Modifier.weight(1f)
+//                    ) {
+//                        Text(
+//                            if (viewModel.stayStatus == StayStatus.CONFIRMED)
+//                                "Modify"
+//                            else
+//                                "Confirm"
+//                        )
+//                    }
+//                }
+//            }
+
+
+            activeDateField?.let { field ->
+                val initialDate = when (field) {
+                    DateField.CHECK_IN -> viewModel.checkInDate
+                    DateField.CHECK_OUT -> viewModel.checkOutDate
+                }
+
+                AppDatePickerDialog(
+                    initialDate = initialDate,
+                    onDateSelected = { selectedDate ->
+                        when (field) {
+                            DateField.CHECK_IN ->
+                                viewModel.onCheckInDateChange(selectedDate)
+
+                            DateField.CHECK_OUT ->
+                                viewModel.onCheckOutDateChange(selectedDate)
+                        }
+                    },
+                    onDismiss = { activeDateField = null }
+                )
+            }
+
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.deleteStay { onSaved() }
+                                showDeleteDialog = false
+                            }
+                        ) { Text("Delete") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Delete Stay?") },
+                    text = { Text("This action cannot be undone.") }
+                )
+            }
+
         }
     }
 }
