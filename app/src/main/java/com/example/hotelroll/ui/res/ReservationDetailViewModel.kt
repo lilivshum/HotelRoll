@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.example.hotelroll.HotelApplication
@@ -15,6 +17,7 @@ import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.ui.utilities.StayUi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -42,6 +45,12 @@ class ReservationDetailViewModel(
     private val notesFlow = MutableStateFlow("")
     val notes = notesFlow.asStateFlow()
 
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
+    var hasConfirmedStay by mutableStateOf(false)
+        private set
+
 
     init{
         loadReservationInfo()
@@ -62,10 +71,25 @@ class ReservationDetailViewModel(
             _reservation.value = repository.getResById(resId)
             _staysUi.value = repository.getStaysUi(resId)
             notesFlow.value = _reservation.value?.notes.orEmpty()
+            hasConfirmedStay = repository.hasConfirmedStay(resId)
         }
     }
 
     fun onNotesChanged(text: String){
         notesFlow.value = text
     }
+
+
+    fun deleteRes(onDone: () -> Unit = {}){
+        viewModelScope.launch {
+            try {
+                repository.deleteReservation(resId)
+                onDone()
+            } catch (e: Exception) {
+               errorMessage = e.message
+            }
+        }
+    }
+
+
 }

@@ -180,8 +180,9 @@ class HotelRepository(
 
     }
 
-    suspend fun deleteReservation(reservation: Reservation) {
-        reservationDao.delete(reservation)
+    suspend fun deleteReservation(resId: Long) {
+        val res = reservationDao.getById(resId)
+        res?.let{reservationDao.delete(res)}
     }
 
     suspend fun deleteStay(stayId: Long) {
@@ -318,8 +319,9 @@ class HotelRepository(
         return reservationDao.getExactReservation(name)
     }
 
-
-
+    suspend fun hasConfirmedStay(resId: Long): Boolean{
+        return stayDao.hasConfirmedStay(resId)
+    }
 
 }
 

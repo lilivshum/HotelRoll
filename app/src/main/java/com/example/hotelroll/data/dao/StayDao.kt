@@ -106,5 +106,19 @@ SELECT EXISTS(
         excludeStayId: Long
     ): Boolean
 
+    @Query(
+        """
+            SELECT EXISTS(
+            SELECT 1 FROM stays 
+            WHERE reservationId =:resId
+            AND status = :status
+            )
+        """
+    )
+    suspend fun hasConfirmedStay(
+        resId: Long,
+        status: StayStatus = StayStatus.CONFIRMED
+    ): Boolean
+
 
 }
