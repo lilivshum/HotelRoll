@@ -10,10 +10,10 @@ import com.example.hotelroll.data.model.TariffType
 
 class Converters {
     @TypeConverter
-    fun fromLocalDate(date: LocalDate): String = date.toString()
+    fun fromLocalDate(date: LocalDate?): String? = date?.toString()
 
     @TypeConverter
-    fun toLocalDate(value: String): LocalDate = LocalDate.parse(value)
+    fun toLocalDate(value: String?): LocalDate? = value?.let { LocalDate.parse(it) }
 
     @TypeConverter
     fun fromStayStatus(status: StayStatus?): String? =

@@ -3,6 +3,7 @@ package com.example.hotelroll.data.dto
 import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
+import java.time.LocalDate
 
 // Hotel Roll Item, depends on date, used for display
 class RollItem (
@@ -16,4 +17,6 @@ class RollItem (
     val tariffType: TariffType?,
     val stayStatus: StayStatus?,
     val currency: Currency?,
+    val checkInDate: LocalDate?,
+    val checkOutDate: LocalDate?,
 )

@@ -323,5 +323,23 @@ class HotelRepository(
         return stayDao.hasConfirmedStay(resId)
     }
 
+    // function that moves stay to another room
+    suspend fun tryMoveStay(
+        stayId: Long,
+        checkInDate: LocalDate,
+        checkOutDate: LocalDate,
+        newRoomId: Long
+    ): Boolean {
+        val hasOverlap = stayDao.hasOverlap(
+            newRoomId,
+            checkInDate,
+            checkOutDate,
+            stayId
+        )
+        if (hasOverlap) return false
+        stayDao.updateRoom(stayId, newRoomId)
+        return true
+    }
+
 }
 

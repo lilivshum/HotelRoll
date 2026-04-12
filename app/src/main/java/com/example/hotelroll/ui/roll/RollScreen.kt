@@ -47,7 +47,7 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
             rollItems.forEach { println(it) }
 
             // Table with horizontal scroll + vertical scrolling inside
-            RollTable(rollItems = rollItems, onStayClick, onEmptyClick, date )
+            RollTable(rollItems = rollItems, onStayClick, onEmptyClick, date, viewModel)
         }
     }
 }

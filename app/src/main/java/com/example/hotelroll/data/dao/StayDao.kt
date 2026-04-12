@@ -120,5 +120,14 @@ SELECT EXISTS(
         status: StayStatus = StayStatus.CONFIRMED
     ): Boolean
 
+    @Query("""
+    UPDATE stays
+    SET roomId = :newRoomId
+    WHERE stayId = :stayId
+""")
+    suspend fun updateRoom(
+        stayId: Long,
+        newRoomId: Long
+    )
 
 }
