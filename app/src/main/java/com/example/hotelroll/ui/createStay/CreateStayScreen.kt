@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -56,8 +57,11 @@ import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.ui.createRes.DateField
+import com.example.hotelroll.ui.utilities.NotesEditor
 import com.example.hotelroll.ui.navigation.StayMode
 import com.example.hotelroll.ui.utilities.AppDatePickerDialog
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import java.time.format.DateTimeFormatter
 
 private val dateFormatter =
@@ -127,8 +131,9 @@ fun ReservationField(viewModel: CreateStayViewModel) {
                 expanded = true
             },
             label = { Text("Reservation Name") },
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
         )
 
         ExposedDropdownMenu(
@@ -190,7 +195,11 @@ fun CreateStayScreen(
 
     val roomNumber = viewModel.roomNumber
     val mode = viewModel.stayMode // observation mode
+    val editNotes by viewModel.editNotes.collectAsState()
 
+    // Local string state for numeric fields — avoids snap-back when deleting digits
+    var adultsText by remember(viewModel.peopleInRoom) { mutableStateOf(viewModel.peopleInRoom.toString()) }
+    var kidsText by remember(viewModel.kidsInRoom) { mutableStateOf(viewModel.kidsInRoom.toString()) }
 
     var activeDateField by remember { mutableStateOf<DateField?>(null) }
 
@@ -269,9 +278,13 @@ fun CreateStayScreen(
 //            )
                 ReservationField(viewModel)
             } else {
-                Text(
-                    "Reservation: ${viewModel.reservationName.value}",
-                    style = MaterialTheme.typography.headlineSmall
+                OutlinedTextField(
+                    value = viewModel.reservationName.value,
+                    onValueChange = {},
+                    readOnly = true,
+                    enabled = false,
+                    label = { Text("Reservation") },
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -283,17 +296,27 @@ fun CreateStayScreen(
             )
 
             OutlinedTextField(
-                value = viewModel.peopleInRoom.toString(),
-                onValueChange = { it.toIntOrNull()?.let(viewModel::onPeopleInRoomChange) },
+                value = adultsText,
+                onValueChange = { newVal ->
+                    adultsText = newVal
+                    newVal.toIntOrNull()?.let(viewModel::onPeopleInRoomChange)
+                },
                 label = { Text("Adults") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
             )
 
             OutlinedTextField(
-                value = viewModel.kidsInRoom.toString(),
-                onValueChange = { it.toIntOrNull()?.let(viewModel::onKidsInRoomChange) },
+                value = kidsText,
+                onValueChange = { newVal ->
+                    kidsText = newVal
+                    newVal.toIntOrNull()?.let(viewModel::onKidsInRoomChange)
+                },
                 label = { Text("Kids") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
             )
 
             // Check-in date field
@@ -351,35 +374,62 @@ fun CreateStayScreen(
             }
 
 
-            OutlinedTextField(
-                value = viewModel.notes ?: "",
-                onValueChange = viewModel::onNotesChange,
-                label = { Text("Notes") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            if (mode == StayMode.CREATE) {
+                OutlinedTextField(
+                    value = viewModel.notes ?: "",
+                    onValueChange = viewModel::onNotesChange,
+                    label = { Text("Notes") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             viewModel.errorMessage?.let {
                 Text(it, color = MaterialTheme.colorScheme.error)
             }
 
-            Button(
+            val saveIsDirty = mode == StayMode.EDIT && viewModel.hasUnsavedChanges
+            val saveContainerColor by animateColorAsState(
+                targetValue = if (saveIsDirty) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                label = "saveContainerColor"
+            )
+            val saveContentColor by animateColorAsState(
+                targetValue = if (saveIsDirty) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                label = "saveContentColor"
+            )
+            val saveBorderColor by animateColorAsState(
+                targetValue = if (saveIsDirty) Color.Transparent else MaterialTheme.colorScheme.outline,
+                label = "saveBorderColor"
+            )
+
+            OutlinedButton(
                 onClick = {
                     if (mode == StayMode.CREATE) {
-                        viewModel.save {
-                            onSaved()
-                        }
+                        viewModel.save { onSaved() }
                     } else {
                         viewModel.save {
                             viewModel.reset()
                             onSaved()
                         }
                     }
-                }) {
+                },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = saveContainerColor,
+                    contentColor = saveContentColor
+                ),
+                border = BorderStroke(1.dp, saveBorderColor)
+            ) {
                 Text(
                     if (mode == StayMode.CREATE)
                         "Create Stay"
                     else
                         "Save Changes"
+                )
+            }
+
+            if (mode == StayMode.EDIT) {
+                NotesEditor(
+                    notes = editNotes,
+                    onNotesChanged = viewModel::onEditNotesChange
                 )
             }
 

@@ -121,6 +121,36 @@ class CreateStayViewModel(
     var currency by mutableStateOf(Currency.USD)
         private set
 
+    // auto-saving notes flow for EDIT mode (same debounce pattern as StayDetailViewModel)
+    private val _editNotesFlow = MutableStateFlow("")
+    val editNotes: StateFlow<String> = _editNotesFlow
+
+    fun onEditNotesChange(v: String) { _editNotesFlow.value = v }
+
+    // originals stored after hydrate — used to detect unsaved changes
+    private var origStayName: String? = null
+    private var origPeopleInRoom: Int = 1
+    private var origKidsInRoom: Int = 0
+    private var origCheckInDate: LocalDate = date
+    private var origCheckOutDate: LocalDate = date.plusDays(1)
+    private var origTariff: Double = 60.0
+    private var origTariffType: TariffType = TariffType.NET
+    private var origNotes: String? = null
+    private var origCurrency: Currency = Currency.USD
+
+    val hasUnsavedChanges: Boolean
+        get() = stayMode == StayMode.EDIT && (
+            stayName != origStayName ||
+            peopleInRoom != origPeopleInRoom ||
+            kidsInRoom != origKidsInRoom ||
+            checkInDate != origCheckInDate ||
+            checkOutDate != origCheckOutDate ||
+            tariff != origTariff ||
+            tariffType != origTariffType ||
+            notes != origNotes ||
+            currency != origCurrency
+        )
+
 
     init {
         if(stayMode == StayMode.EDIT) {
@@ -133,7 +163,15 @@ class CreateStayViewModel(
                 val res = repository.getResById(stay.reservationId)
                 _reservationName.value = res!!.resName // assumes reservation is non-null
                 hydrate(stay)
+            }
 
+            viewModelScope.launch {
+                _editNotesFlow
+                    .debounce(500)
+                    .distinctUntilChanged()
+                    .collect { newNotes ->
+                        stayId?.let { repository.updateStayNotes(it, newNotes) }
+                    }
             }
         } else if(stayMode == StayMode.CREATE){
             viewModelScope.launch {
@@ -156,6 +194,20 @@ class CreateStayViewModel(
             resId = stay.reservationId
             stayStatus = stay.status
             currency = stay.currency
+
+            // seed auto-save notes flow for EDIT mode
+            _editNotesFlow.value = stay.notes.orEmpty()
+
+            // snapshot originals for unsaved-changes detection
+            origStayName = stay.stayName
+            origPeopleInRoom = stay.peopleInRoom
+            origKidsInRoom = stay.kidsInRoom
+            origCheckInDate = stay.checkInDate
+            origCheckOutDate = stay.checkOutDate
+            origTariff = stay.tariff
+            origTariffType = stay.tariffType
+            origNotes = stay.notes
+            origCurrency = stay.currency
     }
 
     fun onResNameChange(v: String) { resName = v }
@@ -203,6 +255,9 @@ class CreateStayViewModel(
     fun onReservationSelected(reservation: Reservation) {
         _selectedReservation.value = reservation
         _reservationName.value = reservation.resName
+        checkInDate = reservation.checkInDate
+        nights = reservation.nights
+        checkOutDate = reservation.checkInDate.plusDays(reservation.nights.toLong())
     }
 
     suspend fun getReservation(): Reservation? {
