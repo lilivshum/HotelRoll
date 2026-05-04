@@ -1,14 +1,17 @@
 package com.example.hotelroll.repository
 
 
+import android.content.Context
 import android.util.Log.e
 import androidx.room.withTransaction
 import com.example.hotelroll.data.dao.ReservationDao
 import com.example.hotelroll.data.dao.StayDao
+import com.example.hotelroll.data.dao.UserDao
 import com.example.hotelroll.data.database.HotelDatabase
 import com.example.hotelroll.domain.HotelManager
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.Stay
+import com.example.hotelroll.data.model.User
 import com.example.hotelroll.data.dao.RoomDao
 import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
@@ -17,15 +20,35 @@ import com.example.hotelroll.data.dto.RollItem
 import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.TariffType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.example.hotelroll.ui.utilities.StayUi
+
+private const val PREFS_NAME = "hotel_prefs"
+private const val KEY_ACTIVE_USER_ID = "active_user_id"
 
 class HotelRepository(
     private val db: HotelDatabase,
     private val reservationDao: ReservationDao,
     private val stayDao: StayDao,
     private val roomDao: RoomDao,
-    private val manager: HotelManager
+    private val userDao: UserDao,
+    private val manager: HotelManager,
+    context: Context
 ) {
+    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val _activeUserId = MutableStateFlow(prefs.getLong(KEY_ACTIVE_USER_ID, 1L))
+    val activeUserId: StateFlow<Long> = _activeUserId.asStateFlow()
+
+    val allUsers: Flow<List<User>> = userDao.getAll()
+
+    fun setActiveUser(id: Long) {
+        prefs.edit().putLong(KEY_ACTIVE_USER_ID, id).apply()
+        _activeUserId.value = id
+    }
+
+    suspend fun getUserById(id: Long): User? = userDao.getById(id)
     /** Create reservation and persist */
     suspend fun createReservation(
         resName: String,

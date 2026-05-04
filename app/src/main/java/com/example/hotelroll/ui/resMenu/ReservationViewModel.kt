@@ -1,17 +1,16 @@
 package com.example.hotelroll.ui.resMenu
 
 import com.example.hotelroll.data.model.Reservation
+import com.example.hotelroll.data.model.User
 import com.example.hotelroll.repository.HotelRepository
 import androidx.lifecycle.ViewModel
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 
 class ReservationViewModel(
@@ -25,4 +24,25 @@ class ReservationViewModel(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList()
             )
+
+    val allUsers: StateFlow<List<User>> =
+        repository.allUsers
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
+
+    val activeUser: StateFlow<User?> =
+        combine(repository.activeUserId, repository.allUsers) { id, users ->
+            users.find { it.id == id }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
+
+    fun switchUser(user: User) {
+        repository.setActiveUser(user.id)
     }
+}

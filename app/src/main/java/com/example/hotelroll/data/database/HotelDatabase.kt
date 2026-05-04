@@ -9,6 +9,8 @@ import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.dao.StayDao
 import com.example.hotelroll.data.model.RoomEntity
 import com.example.hotelroll.data.dao.RoomDao
+import com.example.hotelroll.data.dao.UserDao
+import com.example.hotelroll.data.model.User
 
 import android.content.Context
 import androidx.room.Room
@@ -20,8 +22,8 @@ import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 
 
 @Database(
-    entities = [Reservation::class, Stay::class, RoomEntity::class],
-    version = 8,
+    entities = [Reservation::class, Stay::class, RoomEntity::class, User::class],
+    version = 9,
     exportSchema = false
 )
 
@@ -32,6 +34,7 @@ abstract class HotelDatabase : RoomDatabase() {
     abstract fun reservationDao(): ReservationDao
     abstract fun stayDao(): StayDao
     abstract fun roomDao(): RoomDao
+    abstract fun userDao(): UserDao
 
     companion object {
 

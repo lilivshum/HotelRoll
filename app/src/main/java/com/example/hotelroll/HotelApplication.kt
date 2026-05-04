@@ -7,6 +7,7 @@ import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.data.seed.DEFAULT_ROOMS
+import com.example.hotelroll.data.seed.DEFAULT_USERS
 import com.example.hotelroll.domain.HotelManager
 import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.ui.createStay.TariffTypeSelector
@@ -31,7 +32,9 @@ class HotelApplication : Application() {
             reservationDao = database.reservationDao(),
             stayDao = database.stayDao(),
             roomDao = database.roomDao(),
-            manager
+            userDao = database.userDao(),
+            manager = manager,
+            context = applicationContext
         )
     }
 
@@ -46,9 +49,14 @@ class HotelApplication : Application() {
     private suspend fun seedDatabase() {
         val roomDao = database.roomDao()
         val reservationDao = database.reservationDao()
+        val userDao = database.userDao()
 
         if (roomDao.countRooms() == 0) {
             roomDao.insertAll(DEFAULT_ROOMS)
+        }
+
+        if (userDao.countUsers() == 0) {
+            userDao.insertAll(DEFAULT_USERS)
         }
 
         if (reservationDao.countReservations() == 0) {

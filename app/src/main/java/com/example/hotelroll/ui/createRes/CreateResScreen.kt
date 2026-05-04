@@ -30,8 +30,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
@@ -64,8 +66,11 @@ fun CreateResScreen (
     )
 
 
-    var activeDateField by remember { mutableStateOf<DateField?>(null) }
+    // Local string state for numeric fields — avoids snap-back when deleting digits
+    var guestsText by remember(viewModel.noGuests) { mutableStateOf(viewModel.noGuests.toString()) }
+    var kidsText by remember(viewModel.noKids) { mutableStateOf(viewModel.noKids.toString()) }
 
+    var activeDateField by remember { mutableStateOf<DateField?>(null) }
 
     // For date display only
     val checkInDate = viewModel.checkInDate
@@ -103,17 +108,27 @@ fun CreateResScreen (
             )
 
             OutlinedTextField(
-                value = viewModel.noGuests.toString(),
-                onValueChange = { it.toIntOrNull()?.let(viewModel::onGuestsChange) },
+                value = guestsText,
+                onValueChange = { newVal ->
+                    guestsText = newVal
+                    newVal.toIntOrNull()?.let(viewModel::onGuestsChange)
+                },
                 label = { Text("Number of Guests") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
             )
 
             OutlinedTextField(
-                value = viewModel.noKids.toString(),
-                onValueChange = { it.toIntOrNull()?.let(viewModel::onKidsChange) },
+                value = kidsText,
+                onValueChange = { newVal ->
+                    kidsText = newVal
+                    newVal.toIntOrNull()?.let(viewModel::onKidsChange)
+                },
                 label = { Text("Number of Kids") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
             )
 
             // Check-in date field
