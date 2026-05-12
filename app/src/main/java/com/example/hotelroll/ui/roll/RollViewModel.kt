@@ -44,12 +44,26 @@ class RollViewModel(
     var selectedItem by mutableStateOf<RollItem?>(null)
         private set
 
+    var validTargetRoomIds by mutableStateOf<Set<Long>>(emptySet())
+        private set
+
     fun selectItem(item: RollItem) {
         selectedItem = item
+        validTargetRoomIds = emptySet()
+        viewModelScope.launch {
+            val blocked = repository.getBlockedRoomIds(
+                checkIn = item.checkInDate!!,
+                checkOut = item.checkOutDate!!,
+                excludeStayId = item.stayId!!
+            ).toSet()
+            val allRoomIds = roll.value.map { it.roomId }.toSet()
+            validTargetRoomIds = allRoomIds - blocked - item.roomId
+        }
     }
 
     fun clearSelection() {
         selectedItem = null
+        validTargetRoomIds = emptySet()
     }
 
     fun moveStayToRoom(

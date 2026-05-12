@@ -346,6 +346,12 @@ class HotelRepository(
         return stayDao.hasConfirmedStay(resId)
     }
 
+    suspend fun getBlockedRoomIds(
+        checkIn: LocalDate,
+        checkOut: LocalDate,
+        excludeStayId: Long
+    ): List<Long> = stayDao.getBlockedRoomIds(checkIn, checkOut, excludeStayId)
+
     // function that moves stay to another room
     suspend fun tryMoveStay(
         stayId: Long,

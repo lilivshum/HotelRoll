@@ -2,12 +2,17 @@ package com.example.hotelroll.ui.roll
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -42,7 +47,31 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                 viewModel
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Move mode cancel banner
+            if (viewModel.selectedItem != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Moving room ${viewModel.selectedItem!!.roomNumber} — tap a destination",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = viewModel::clearSelection) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel move",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             rollItems.forEach { println(it) }
 

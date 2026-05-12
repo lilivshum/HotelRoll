@@ -130,4 +130,16 @@ SELECT EXISTS(
         newRoomId: Long
     )
 
+    @Query("""
+        SELECT DISTINCT roomId FROM stays
+        WHERE stayId != :excludeStayId
+        AND :checkIn < checkOutDate
+        AND :checkOut > checkInDate
+    """)
+    suspend fun getBlockedRoomIds(
+        checkIn: LocalDate,
+        checkOut: LocalDate,
+        excludeStayId: Long
+    ): List<Long>
+
 }

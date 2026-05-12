@@ -41,7 +41,7 @@ fun RoomRow(
 ) {
     val selectedItem = viewModel.selectedItem
     val isSource = selectedItem?.roomId == item.roomId
-    val isDropTarget = selectedItem != null && !isSource
+    val isDropTarget = selectedItem != null && !isSource && item.roomId in viewModel.validTargetRoomIds
 
     val backgroundColor = when {
         isDropTarget -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
@@ -73,11 +73,13 @@ fun RoomRow(
                     when {
                         // tap source row → deselect
                         isSource -> viewModel.clearSelection()
-                        // tap a destination row → move stay
+                        // tap a valid destination row → move stay
                         isDropTarget -> {
                             viewModel.moveStayToRoom(selectedItem!!, item.roomId) {}
                             viewModel.clearSelection()
                         }
+                        // in move mode but not a valid target — block all navigation
+                        selectedItem != null -> { }
                         // normal navigation when nothing is selected
                         item.stayId != null && item.stayStatus == StayStatus.CONFIRMED ->
                             onStayClick(item.stayId, item.roomNumber, item.reservationName ?: "")
