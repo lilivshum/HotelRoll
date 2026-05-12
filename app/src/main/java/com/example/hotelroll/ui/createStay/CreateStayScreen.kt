@@ -200,8 +200,17 @@ fun CreateStayScreen(
     // Local string state for numeric fields — avoids snap-back when deleting digits
     var adultsText by remember(viewModel.peopleInRoom) { mutableStateOf(viewModel.peopleInRoom.toString()) }
     var kidsText by remember(viewModel.kidsInRoom) { mutableStateOf(viewModel.kidsInRoom.toString()) }
+    var tariffText by remember(viewModel.tariff) {
+        mutableStateOf(
+            if (viewModel.tariff % 1.0 == 0.0) viewModel.tariff.toInt().toString()
+            else viewModel.tariff.toString()
+        )
+    }
 
     var activeDateField by remember { mutableStateOf<DateField?>(null) }
+    var showRoomPickerDialog by remember { mutableStateOf(false) }
+    var roomSearchText by remember { mutableStateOf("") }
+    var roomDropdownExpanded by remember { mutableStateOf(false) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -210,10 +219,33 @@ fun CreateStayScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Room $roomNumber",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
+                    if (mode == StayMode.CREATE) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable {
+                                roomSearchText = ""
+                                roomDropdownExpanded = false
+                                viewModel.loadAvailableRooms()
+                                showRoomPickerDialog = true
+                            }
+                        ) {
+                            Text(
+                                text = "Room $roomNumber",
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Change room",
+                                modifier = Modifier.padding(start = 6.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "Room $roomNumber",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -352,10 +384,15 @@ fun CreateStayScreen(
 //        )
 
             OutlinedTextField(
-                value = viewModel.tariff.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let(viewModel::onTariffChange) },
+                value = tariffText,
+                onValueChange = { newVal ->
+                    tariffText = newVal
+                    newVal.toDoubleOrNull()?.let(viewModel::onTariffChange)
+                },
                 label = { Text("Rate") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true
             )
 
             Row(
@@ -498,6 +535,57 @@ fun CreateStayScreen(
                         }
                     },
                     onDismiss = { activeDateField = null }
+                )
+            }
+
+            if (showRoomPickerDialog) {
+                val filteredRooms = viewModel.availableRooms.filter {
+                    it.roomNumber.contains(roomSearchText, ignoreCase = true)
+                }
+                AlertDialog(
+                    onDismissRequest = { showRoomPickerDialog = false },
+                    title = { Text("Change room") },
+                    text = {
+                        ExposedDropdownMenuBox(
+                            expanded = roomDropdownExpanded && filteredRooms.isNotEmpty(),
+                            onExpandedChange = { roomDropdownExpanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = roomSearchText,
+                                onValueChange = {
+                                    roomSearchText = it
+                                    roomDropdownExpanded = true
+                                },
+                                label = { Text("Room number") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                            )
+                            ExposedDropdownMenu(
+                                expanded = roomDropdownExpanded && filteredRooms.isNotEmpty(),
+                                onDismissRequest = { roomDropdownExpanded = false }
+                            ) {
+                                filteredRooms.forEach { room ->
+                                    DropdownMenuItem(
+                                        text = { Text("Room ${room.roomNumber}") },
+                                        onClick = {
+                                            viewModel.changeRoom(room)
+                                            showRoomPickerDialog = false
+                                            roomDropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {
+                        TextButton(onClick = { showRoomPickerDialog = false }) {
+                            Text("Cancel")
+                        }
+                    }
                 )
             }
 

@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import java.time.temporal.ChronoUnit
 import com.example.hotelroll.data.model.Currency
+import com.example.hotelroll.data.model.RoomEntity
 
 class CreateStayViewModel(
     private val repository: HotelRepository,
@@ -36,21 +37,19 @@ class CreateStayViewModel(
 ): ViewModel() {
 
 
-    val roomId: Long =
-        checkNotNull(savedStateHandle["roomId"])
-
+    var roomId: Long by mutableStateOf(checkNotNull(savedStateHandle["roomId"]))
+        private set
 
     val stayMode: StayMode =
         StayMode.valueOf(checkNotNull(savedStateHandle["mode"]))
-
 
     val stayId: Long? = savedStateHandle.get<String>("stayId")?.toLongOrNull()
 
     var resName by mutableStateOf("")
         private set
 
-    val roomNumber: String =
-        checkNotNull(savedStateHandle["roomNumber"])
+    var roomNumber: String by mutableStateOf(checkNotNull(savedStateHandle["roomNumber"]))
+        private set
 
     val date: LocalDate =
         LocalDate.parse(checkNotNull(savedStateHandle["date"]))
@@ -276,6 +275,30 @@ class CreateStayViewModel(
 
     fun onCurrencyChange(value: Currency) {
         currency = value
+    }
+
+    var availableRooms by mutableStateOf<List<RoomEntity>>(emptyList())
+        private set
+
+    fun loadAvailableRooms() {
+        viewModelScope.launch {
+            val allRooms = repository.getAllRooms()
+            val blocked = repository.getBlockedRoomIds(
+                checkIn = checkInDate,
+                checkOut = checkOutDate,
+                excludeStayId = stayId ?: -1L
+            ).toSet()
+            availableRooms = allRooms.filter { it.roomId !in blocked }
+        }
+    }
+
+    fun changeRoom(room: RoomEntity) {
+        viewModelScope.launch {
+            roomNumber = room.roomNumber
+            roomId = room.roomId
+            tariff = repository.getRoomTariff(room.roomId)
+            errorMessage = null
+        }
     }
 
     fun reset() {

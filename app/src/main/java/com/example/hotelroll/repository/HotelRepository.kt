@@ -309,6 +309,10 @@ class HotelRepository(
         return roomDao.getRoomTariff(id)
     }
 
+    suspend fun getRoomByNumber(roomNumber: String) = roomDao.getByRoomNumber(roomNumber)
+
+    suspend fun getAllRooms() = roomDao.getAll()
+
     // class for update stay result
     sealed class StayResult{
         object Success: StayResult()
