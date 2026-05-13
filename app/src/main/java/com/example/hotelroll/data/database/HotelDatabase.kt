@@ -23,7 +23,7 @@ import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 
 @Database(
     entities = [Reservation::class, Stay::class, RoomEntity::class, User::class],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 

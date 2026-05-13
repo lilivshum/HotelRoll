@@ -112,7 +112,7 @@ fun ReservationDetailScreen(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-                        } else {
+                        } else if (reservation.isActive) {
                             IconButton(onClick = { isEditing = true }) {
                                 Icon(
                                     Icons.Default.Edit,
@@ -123,7 +123,7 @@ fun ReservationDetailScreen(
                             IconButton(onClick = { showDeleteDialog = true }) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Delete",
+                                    contentDescription = "Close reservation",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -215,18 +215,18 @@ fun ReservationDetailScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.deleteRes { onBackClick() }
+                            viewModel.closeReservation { onBackClick() }
                             showDeleteDialog = false
                         }
-                    ) { Text("Delete") }
+                    ) { Text("Close") }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteDialog = false }) {
                         Text("Cancel")
                     }
                 },
-                title = { Text("Delete Reservation ${reservation.resName}?") },
-                text = { Text("This action cannot be undone.") }
+                title = { Text("Close ${reservation.resName}?") },
+                text = { Text("This reservation will be moved to Past. It can still be viewed but not edited.") }
             )
         }
 

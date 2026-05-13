@@ -207,9 +207,13 @@ class HotelRepository(
         reservationDao.update(reservation)
     }
 
+    suspend fun deactivateReservation(resId: Long) {
+        reservationDao.deactivate(resId)
+    }
+
     suspend fun deleteReservation(resId: Long) {
         val res = reservationDao.getById(resId)
-        res?.let{reservationDao.delete(res)}
+        res?.let { reservationDao.delete(res) }
     }
 
     suspend fun deleteStay(stayId: Long) {
@@ -265,6 +269,12 @@ class HotelRepository(
     fun getAllReservationsSnapshot(): Flow<List<Reservation>> {
         return reservationDao.getAllReservationsSnapshot()
     }
+
+    fun getActiveReservations(today: LocalDate): Flow<List<Reservation>> =
+        reservationDao.getActiveReservations(today)
+
+    fun getPastReservations(today: LocalDate): Flow<List<Reservation>> =
+        reservationDao.getPastReservations(today)
 
     suspend fun getStayByResId(resId: Long): List<Stay> {
         return stayDao.getByResId(resId)

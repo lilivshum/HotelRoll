@@ -42,19 +42,21 @@ fun StayDetailScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    val isPast = stay?.checkOutDate?.isBefore(java.time.LocalDate.now()) == true
+
     Scaffold(
         topBar = {
             StayDetailsTopBar(
                 title = roomNumber,
                 onBack = onBack,
-                onEdit = if (onEdit != null) {
+                onEdit = if (onEdit != null && !isPast) {
                     {
                         stay?.let { s ->
                             onEdit(s.roomId, roomNumber, s.checkInDate.toString(), s.stayId)
                         }
                     }
                 } else null,
-                onDelete = if (onDeleted != null) {
+                onDelete = if (onDeleted != null && !isPast) {
                     { showDeleteDialog = true }
                 } else null
             )

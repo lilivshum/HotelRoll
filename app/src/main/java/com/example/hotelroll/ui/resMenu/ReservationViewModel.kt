@@ -11,14 +11,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
+import java.time.LocalDate
 
 class ReservationViewModel(
     private val repository: HotelRepository
 ) : ViewModel() {
 
-    val reservations: StateFlow<List<Reservation>> =
-        repository.getAllReservationsSnapshot()
+    private val today = LocalDate.now()
+
+    val activeReservations: StateFlow<List<Reservation>> =
+        repository.getActiveReservations(today)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
+
+    val pastReservations: StateFlow<List<Reservation>> =
+        repository.getPastReservations(today)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),

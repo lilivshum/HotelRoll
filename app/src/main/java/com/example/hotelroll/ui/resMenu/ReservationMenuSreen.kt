@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AlertDialog
@@ -39,12 +41,14 @@ fun ReservationMenuScreen(
     onReservationClick: (Long) -> Unit,
     onAddReservationClick: () -> Unit
 ) {
-    val reservations by viewModel.reservations.collectAsState()
+    val activeReservations by viewModel.activeReservations.collectAsState()
+    val pastReservations by viewModel.pastReservations.collectAsState()
     val activeUser by viewModel.activeUser.collectAsState()
     val allUsers by viewModel.allUsers.collectAsState()
 
     var showSwitcherDialog by remember { mutableStateOf(false) }
     var pendingUser by remember { mutableStateOf<User?>(null) }
+    var pastExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -88,7 +92,7 @@ fun ReservationMenuScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Reservations (${reservations.size})",
+                text = "Reservations (${activeReservations.size})",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -100,8 +104,9 @@ fun ReservationMenuScreen(
             }
         }
 
-        LazyColumn {
-            items(reservations) { item ->
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            // Active reservations
+            items(activeReservations) { item ->
                 Text(
                     text = item.resName,
                     modifier = Modifier
@@ -109,6 +114,46 @@ fun ReservationMenuScreen(
                         .clickable { onReservationClick(item.id) }
                         .padding(vertical = 12.dp)
                 )
+            }
+
+            // Past section header — only show if there are past reservations
+            if (pastReservations.isNotEmpty()) {
+                item {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { pastExpanded = !pastExpanded }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Past (${pastReservations.size})",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = if (pastExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = if (pastExpanded) "Collapse" else "Expand",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                if (pastExpanded) {
+                    items(pastReservations) { item ->
+                        Text(
+                            text = item.resName,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onReservationClick(item.id) }
+                                .padding(vertical = 12.dp)
+                        )
+                    }
+                }
             }
         }
     }

@@ -122,13 +122,13 @@ class ReservationDetailViewModel(
         }
     }
 
-    fun deleteRes(onDone: () -> Unit = {}){
+    fun closeReservation(onDone: () -> Unit = {}) {
         viewModelScope.launch {
             try {
-                repository.deleteReservation(resId)
+                repository.deactivateReservation(resId)
                 onDone()
             } catch (e: Exception) {
-               errorMessage = e.message
+                errorMessage = e.message
             }
         }
     }

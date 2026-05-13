@@ -12,6 +12,7 @@ data class Reservation(
     val nights: Int,
     val noGuests: Int,
     val noKids: Int,
-    val notes: String? = null
+    val notes: String? = null,
+    val isActive: Boolean = true
 )
 
