@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.ui.createRes.DateField
+import com.example.hotelroll.ui.navigation.StayMode
 import com.example.hotelroll.ui.utilities.AppDatePickerDialog
 import com.example.hotelroll.ui.utilities.NotesEditor
 
@@ -46,7 +49,8 @@ import com.example.hotelroll.ui.utilities.NotesEditor
 fun ReservationDetailScreen(
     reservationId: Long,
     onBackClick: () -> Unit,
-    onStayClick: (Long, String, String) -> Unit
+    onStayClick: (Long, String, String) -> Unit,
+    onAddStay: (roomId: Long, roomNumber: String, date: String, mode: StayMode, stayId: Long?, reservationId: Long?) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -194,7 +198,26 @@ fun ReservationDetailScreen(
                     ResDetailInfoRow("Check-in", reservation.checkInDate.toString())
                     ResDetailInfoRow("Check-out", reservation.checkInDate.plusDays(reservation.nights.toLong()).toString())
                     ResDetailInfoRow("Nights", reservation.nights.toString())
-                    Text("Stays")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Stays", style = MaterialTheme.typography.titleMedium)
+                        if (reservation.isActive) {
+                            IconButton(onClick = {
+                                viewModel.navigateToAddStay { roomId, roomNumber, date, reservationId ->
+                                    onAddStay(roomId, roomNumber, date, StayMode.CREATE, null, reservationId)
+                                }
+                            }) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = "Add stay",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
                     ResRoomsSection(stays, reservation.resName, onStayClick)
                 }
 

@@ -128,6 +128,15 @@ class ReservationDetailViewModel(
         }
     }
 
+    fun navigateToAddStay(onNavigate: (roomId: Long, roomNumber: String, date: String, reservationId: Long) -> Unit) {
+        val res = _reservation.value ?: return
+        viewModelScope.launch {
+            val checkOut = res.checkInDate.plusDays(res.nights.toLong())
+            val room = repository.getFirstAvailableRoom(res.checkInDate, checkOut) ?: return@launch
+            onNavigate(room.roomId, room.roomNumber, res.checkInDate.toString(), res.id)
+        }
+    }
+
     fun closeReservation(onDone: () -> Unit = {}) {
         viewModelScope.launch {
             try {

@@ -22,14 +22,15 @@ sealed class HotelRoute(val route: String) {
 
     // this now is a state that can either create or update / modify a state
     object CreateStay: HotelRoute(
-        "roomId/{roomId}/roomNumber/{roomNumber}/date/{date}/mode/{mode}?stayId={stayId}"
+        "roomId/{roomId}/roomNumber/{roomNumber}/date/{date}/mode/{mode}?stayId={stayId}&reservationId={reservationId}"
     ) {
-        fun createRoute(roomId: Long, roomNumber: String, date: String, mode: StayMode, stayId: Long?): String {
-            return if (stayId != null) {
-                "roomId/$roomId/roomNumber/$roomNumber/date/$date/mode/$mode?stayId=$stayId"
-            } else {
-                "roomId/$roomId/roomNumber/$roomNumber/date/$date/mode/$mode"
+        fun createRoute(roomId: Long, roomNumber: String, date: String, mode: StayMode, stayId: Long?, reservationId: Long? = null): String {
+            val base = "roomId/$roomId/roomNumber/$roomNumber/date/$date/mode/$mode"
+            val params = buildList {
+                if (stayId != null) add("stayId=$stayId")
+                if (reservationId != null) add("reservationId=$reservationId")
             }
+            return if (params.isEmpty()) base else "$base?${params.joinToString("&")}"
         }
     }
 

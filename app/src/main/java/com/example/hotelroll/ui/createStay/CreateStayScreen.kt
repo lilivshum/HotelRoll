@@ -308,13 +308,7 @@ fun CreateStayScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (mode == StayMode.CREATE) {
-//            OutlinedTextField(
-//                value = viewModel.resName,
-//                onValueChange = viewModel::onResNameChange,
-//                label = { Text("Reservation name") },
-//                modifier = Modifier.fillMaxWidth()
-//            )
+            if (mode == StayMode.CREATE && !viewModel.reservationIsLocked) {
                 ReservationField(viewModel)
             } else {
                 OutlinedTextField(

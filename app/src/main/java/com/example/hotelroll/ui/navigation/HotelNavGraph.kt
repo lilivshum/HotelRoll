@@ -114,10 +114,13 @@ fun HotelNavGraph(
 
             ReservationDetailScreen(
                 reservationId,
-                onBackClick = { navController.navigateUp()},
-                onStayClick = { stayId, roomNumber, reservationName->
+                onBackClick = { navController.navigateUp() },
+                onStayClick = { stayId, roomNumber, reservationName ->
                     navController.navigate(HotelRoute.StayDetail.createRoute(stayId, roomNumber, reservationName))
                 },
+                onAddStay = { roomId, roomNumber, date, mode, stayId, reservationId ->
+                    navController.navigate(HotelRoute.CreateStay.createRoute(roomId, roomNumber, date, mode, stayId, reservationId))
+                }
             )
         }
 
@@ -137,6 +140,10 @@ fun HotelNavGraph(
                     type = NavType.StringType
                 },
                 navArgument("stayId"){
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument("reservationId") {
                     type = NavType.StringType
                     nullable = true
                 }

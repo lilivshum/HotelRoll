@@ -47,6 +47,10 @@ class CreateStayViewModel(
         StayMode.valueOf(checkNotNull(savedStateHandle["mode"]))
 
     val stayId: Long? = savedStateHandle.get<String>("stayId")?.toLongOrNull()
+    private val reservationIdArg: Long? = savedStateHandle.get<String>("reservationId")?.toLongOrNull()
+
+    var reservationIsLocked by mutableStateOf(false)
+        private set
 
     var resName by mutableStateOf("")
         private set
@@ -178,6 +182,13 @@ class CreateStayViewModel(
         } else if(stayMode == StayMode.CREATE){
             viewModelScope.launch {
                 tariff = repository.getRoomTariff(roomId)
+                reservationIdArg?.let { preResId ->
+                    val res = repository.getResById(preResId)
+                    res?.let {
+                        onReservationSelected(it)
+                        reservationIsLocked = true
+                    }
+                }
             }
         }
     }

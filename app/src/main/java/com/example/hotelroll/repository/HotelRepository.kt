@@ -13,6 +13,7 @@ import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.model.User
 import com.example.hotelroll.data.dao.RoomDao
+import com.example.hotelroll.data.model.RoomEntity
 import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import java.time.LocalDate
@@ -374,6 +375,12 @@ class HotelRepository(
         checkOut: LocalDate,
         excludeStayId: Long
     ): List<Long> = stayDao.getBlockedRoomIds(checkIn, checkOut, excludeStayId)
+
+    suspend fun getFirstAvailableRoom(checkIn: LocalDate, checkOut: LocalDate): RoomEntity? {
+        val allRooms = roomDao.getAll()
+        val blocked = stayDao.getBlockedRoomIds(checkIn, checkOut, -1L).toSet()
+        return allRooms.firstOrNull { it.roomId !in blocked }
+    }
 
     // function that moves stay to another room
     suspend fun tryMoveStay(
