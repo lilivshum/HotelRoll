@@ -10,15 +10,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,14 +31,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.resolveDefaults
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
-import com.example.hotelroll.ui.navigation.StayMode
-import com.example.hotelroll.ui.stay.StayDetailViewModel
-import com.example.hotelroll.ui.stay.StayDetailViewModelFactory
+import com.example.hotelroll.ui.createRes.DateField
+import com.example.hotelroll.ui.utilities.AppDatePickerDialog
 import com.example.hotelroll.ui.utilities.NotesEditor
 
 
@@ -47,7 +52,6 @@ fun ReservationDetailScreen(
 
     val context = LocalContext.current
     val app = context.applicationContext as HotelApplication
-
 
     val viewModel: ReservationDetailViewModel = viewModel(
         factory = ReservationDetailViewModelFactory(
@@ -65,19 +69,32 @@ fun ReservationDetailScreen(
     val notes by viewModel.notes.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
+
+    // Local string state for numeric fields to avoid snap-back
+    var guestsText by remember(viewModel.noGuests) { mutableStateOf(viewModel.noGuests.toString()) }
+    var kidsText by remember(viewModel.noKids) { mutableStateOf(viewModel.noKids.toString()) }
+
+    var activeDateField by remember { mutableStateOf<DateField?>(null) }
 
     reservation?.let {
-        // function that displays kids and adults in a adults + kids way
         var pax = reservation.noGuests.toString()
-        if(reservation.noKids > 0){
-            pax = pax + "+" + reservation.noKids.toString()
-        }
+        if (reservation.noKids > 0) pax = "$pax+${reservation.noKids}"
+
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(reservation.resName) },
+                    title = { Text(if (isEditing) viewModel.resName else reservation.resName) },
                     navigationIcon = {
-                        IconButton(onClick = onBackClick) {
+                        IconButton(onClick = {
+                            if (isEditing) {
+                                isEditing = false
+                                // reset edit fields back to current reservation values
+                                viewModel.loadReservationInfo()
+                            } else {
+                                onBackClick()
+                            }
+                        }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back"
@@ -85,11 +102,25 @@ fun ReservationDetailScreen(
                         }
                     },
                     actions = {
-
-                        if(!viewModel.hasConfirmedStay) {
-                            IconButton(
-                                onClick = { showDeleteDialog = true }
-                            ) {
+                        if (isEditing) {
+                            IconButton(onClick = {
+                                viewModel.saveEdits { isEditing = false }
+                            }) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = "Save",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = { isEditing = true }) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Edit",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            IconButton(onClick = { showDeleteDialog = true }) {
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = "Delete",
@@ -107,11 +138,65 @@ fun ReservationDetailScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                ResDetailInfoRow("Guests", pax)
-                ResDetailInfoRow("Check-in", reservation.checkInDate.toString())
-                ResDetailInfoRow("Nights", reservation.nights.toString())
-                Text("Stays")
-                ResRoomsSection(stays, reservation.resName, onStayClick)
+                if (isEditing) {
+                    OutlinedTextField(
+                        value = viewModel.resName,
+                        onValueChange = { viewModel.resName = it },
+                        label = { Text("Reservation Name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = guestsText,
+                        onValueChange = { v ->
+                            guestsText = v
+                            v.toIntOrNull()?.let { viewModel.noGuests = it }
+                        },
+                        label = { Text("Adults") },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = kidsText,
+                        onValueChange = { v ->
+                            kidsText = v
+                            v.toIntOrNull()?.let { viewModel.noKids = it }
+                        },
+                        label = { Text("Kids") },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = viewModel.checkInDate.toString(),
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = false,
+                        label = { Text("Check-in date") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { activeDateField = DateField.CHECK_IN }
+                    )
+                    OutlinedTextField(
+                        value = viewModel.checkOutDate.toString(),
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = false,
+                        label = { Text("Check-out date") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { activeDateField = DateField.CHECK_OUT }
+                    )
+                    Text("Nights: ${viewModel.nights}")
+                } else {
+                    ResDetailInfoRow("Guests", pax)
+                    ResDetailInfoRow("Check-in", reservation.checkInDate.toString())
+                    ResDetailInfoRow("Check-out", reservation.checkInDate.plusDays(reservation.nights.toLong()).toString())
+                    ResDetailInfoRow("Nights", reservation.nights.toString())
+                    Text("Stays")
+                    ResRoomsSection(stays, reservation.resName, onStayClick)
+                }
 
                 viewModel.errorMessage?.let {
                     Text(it, color = MaterialTheme.colorScheme.error)
@@ -121,9 +206,9 @@ fun ReservationDetailScreen(
                     notes = notes,
                     onNotesChanged = viewModel::onNotesChanged
                 )
-
             }
         }
+
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
@@ -140,8 +225,26 @@ fun ReservationDetailScreen(
                         Text("Cancel")
                     }
                 },
-                title = { Text("Delete Reservation ${reservation.resName} ?") },
+                title = { Text("Delete Reservation ${reservation.resName}?") },
                 text = { Text("This action cannot be undone.") }
+            )
+        }
+
+        activeDateField?.let { field ->
+            val initialDate = when (field) {
+                DateField.CHECK_IN -> viewModel.checkInDate
+                DateField.CHECK_OUT -> viewModel.checkOutDate
+            }
+            AppDatePickerDialog(
+                initialDate = initialDate,
+                onDateSelected = { selectedDate ->
+                    when (field) {
+                        DateField.CHECK_IN -> viewModel.checkInDate = selectedDate
+                        DateField.CHECK_OUT -> viewModel.onCheckOutDateChange(selectedDate)
+                    }
+                    activeDateField = null
+                },
+                onDismiss = { activeDateField = null }
             )
         }
     }

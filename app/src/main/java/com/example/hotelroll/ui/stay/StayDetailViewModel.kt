@@ -64,5 +64,11 @@ class StayDetailViewModel (
         notesFlow.value = text
     }
 
+    fun deleteStay(onDone: () -> Unit) {
+        viewModelScope.launch {
+            _stay.value?.let { repository.deleteStay(it.stayId) }
+            onDone()
+        }
+    }
 
 }

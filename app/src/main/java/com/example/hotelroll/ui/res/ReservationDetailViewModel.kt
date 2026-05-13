@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import java.time.LocalDate
 
 @OptIn(FlowPreview::class)
 class ReservationDetailViewModel(
@@ -51,13 +52,25 @@ class ReservationDetailViewModel(
     var hasConfirmedStay by mutableStateOf(false)
         private set
 
+    // Edit mode fields
+    var resName by mutableStateOf("")
+    var noGuests by mutableStateOf(1)
+    var noKids by mutableStateOf(0)
+    var checkInDate by mutableStateOf(LocalDate.now())
+    var nights by mutableStateOf(1)
+    val checkOutDate: LocalDate get() = checkInDate.plusDays(nights.toLong())
+
+    fun onCheckOutDateChange(date: LocalDate) {
+        val n = java.time.temporal.ChronoUnit.DAYS.between(checkInDate, date).toInt()
+        if (n > 0) nights = n
+    }
 
     init{
         loadReservationInfo()
 
         viewModelScope.launch {
             notesFlow
-                .debounce(500)        // wait for typing to stop
+                .debounce(500)
                 .distinctUntilChanged()
                 .collect { newNotes ->
                     val current = reservation.value ?: return@collect
@@ -65,6 +78,7 @@ class ReservationDetailViewModel(
                 }
         }
     }
+
     fun loadReservationInfo() {
         viewModelScope.launch {
             _stays.value = repository.getStayByResId(resId)
@@ -72,6 +86,14 @@ class ReservationDetailViewModel(
             _staysUi.value = repository.getStaysUi(resId)
             notesFlow.value = _reservation.value?.notes.orEmpty()
             hasConfirmedStay = repository.hasConfirmedStay(resId)
+            // seed edit fields from loaded reservation
+            _reservation.value?.let { res ->
+                resName = res.resName
+                noGuests = res.noGuests
+                noKids = res.noKids
+                checkInDate = res.checkInDate
+                nights = res.nights
+            }
         }
     }
 
@@ -79,6 +101,26 @@ class ReservationDetailViewModel(
         notesFlow.value = text
     }
 
+    fun saveEdits(onDone: () -> Unit = {}) {
+        val current = _reservation.value ?: return
+        viewModelScope.launch {
+            try {
+                repository.updateReservation(
+                    current.copy(
+                        resName = resName,
+                        noGuests = noGuests,
+                        noKids = noKids,
+                        checkInDate = checkInDate,
+                        nights = nights
+                    )
+                )
+                _reservation.value = repository.getResById(resId)
+                onDone()
+            } catch (e: Exception) {
+                errorMessage = e.message
+            }
+        }
+    }
 
     fun deleteRes(onDone: () -> Unit = {}){
         viewModelScope.launch {
@@ -90,6 +132,5 @@ class ReservationDetailViewModel(
             }
         }
     }
-
 
 }

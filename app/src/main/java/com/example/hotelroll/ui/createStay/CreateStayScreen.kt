@@ -271,22 +271,22 @@ fun CreateStayScreen(
                             )
                         }
 
-                        IconButton(
-                            onClick = {
-                                viewModel.confirmStay {
-                                    viewModel.reset()
-                                    onSaved()
+                        if (viewModel.stayStatus == StayStatus.PENDING) {
+                            IconButton(
+                                onClick = {
+                                    viewModel.confirmStay {
+                                        viewModel.reset()
+                                        onSaved()
+                                    }
                                 }
+                            ) {
+                                Icon(
+                                    Icons.Default.AddTask,
+                                    contentDescription = "Confirm",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
-                        ) {
-                            Icon(
-                                Icons.Default.AddTask,
-                                contentDescription = "Save",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
                         }
-                    } else {
-                        // modify mode option needed
                     }
                 }
             )

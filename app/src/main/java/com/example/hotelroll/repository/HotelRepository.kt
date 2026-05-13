@@ -203,6 +203,10 @@ class HotelRepository(
 
     }
 
+    suspend fun updateReservation(reservation: Reservation) {
+        reservationDao.update(reservation)
+    }
+
     suspend fun deleteReservation(resId: Long) {
         val res = reservationDao.getById(resId)
         res?.let{reservationDao.delete(res)}
