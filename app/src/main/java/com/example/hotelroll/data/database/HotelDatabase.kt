@@ -3,7 +3,9 @@ package com.example.hotelroll.data.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.hotelroll.data.dao.HistoryEntryDao
 import com.example.hotelroll.data.dao.ReservationDao
+import com.example.hotelroll.data.model.HistoryEntry
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.dao.StayDao
@@ -22,8 +24,8 @@ import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 
 
 @Database(
-    entities = [Reservation::class, Stay::class, RoomEntity::class, User::class],
-    version = 10,
+    entities = [Reservation::class, Stay::class, RoomEntity::class, User::class, HistoryEntry::class],
+    version = 11,
     exportSchema = false
 )
 
@@ -35,6 +37,7 @@ abstract class HotelDatabase : RoomDatabase() {
     abstract fun stayDao(): StayDao
     abstract fun roomDao(): RoomDao
     abstract fun userDao(): UserDao
+    abstract fun historyEntryDao(): HistoryEntryDao
 
     companion object {
 

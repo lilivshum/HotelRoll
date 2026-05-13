@@ -4,11 +4,14 @@ package com.example.hotelroll.repository
 import android.content.Context
 import android.util.Log.e
 import androidx.room.withTransaction
+import com.example.hotelroll.data.dao.HistoryEntryDao
 import com.example.hotelroll.data.dao.ReservationDao
 import com.example.hotelroll.data.dao.StayDao
 import com.example.hotelroll.data.dao.UserDao
 import com.example.hotelroll.data.database.HotelDatabase
 import com.example.hotelroll.domain.HotelManager
+import com.example.hotelroll.data.model.HistoryEntry
+import com.example.hotelroll.data.model.HistoryEventType
 import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.model.User
@@ -36,6 +39,7 @@ class HotelRepository(
     private val stayDao: StayDao,
     private val roomDao: RoomDao,
     private val userDao: UserDao,
+    private val historyEntryDao: HistoryEntryDao,
     private val manager: HotelManager,
     context: Context
 ) {
@@ -55,6 +59,26 @@ class HotelRepository(
     }
 
     suspend fun getUserById(id: Long): User? = userDao.getById(id)
+
+    private suspend fun logEvent(reservationId: Long, eventType: HistoryEventType, note: String? = null) {
+        val userId = _activeUserId.value
+        val userName = userDao.getById(userId)?.name ?: "Unknown"
+        historyEntryDao.insert(
+            HistoryEntry(
+                reservationId = reservationId,
+                eventType = eventType,
+                userId = userId,
+                userName = userName,
+                timestamp = System.currentTimeMillis(),
+                note = note
+            )
+        )
+    }
+
+    fun getHistoryEntries(resId: Long) = historyEntryDao.getByReservationId(resId)
+
+    suspend fun getHistoryEntryCount(resId: Long) = historyEntryDao.countByReservationId(resId)
+
     /** Create reservation and persist */
     suspend fun createReservation(
         resName: String,
@@ -64,15 +88,12 @@ class HotelRepository(
         checkInDate: LocalDate,
         nights: Int
     ): Long {
-        val reservation = manager.createReservation(
-            resName,
-            noGuests,
-            noKids,
-            notes,
-            checkInDate,
-            nights
-        )
-        return reservationDao.insert(reservation)
+        val reservation = manager.createReservation(resName, noGuests, noKids, notes, checkInDate, nights)
+        return db.withTransaction {
+            val resId = reservationDao.insert(reservation)
+            logEvent(resId, HistoryEventType.RESERVATION_CREATED)
+            resId
+        }
     }
 
     // assigned room result class
@@ -150,6 +171,7 @@ class HotelRepository(
         )
 
         stayDao.insert(stay)
+        logEvent(reservationId, HistoryEventType.STAY_CREATED, "Room $roomNumber")
 
         return AssignRoomResult.Success(stay.stayId)
     }
@@ -214,17 +236,28 @@ class HotelRepository(
     }
 
     suspend fun deactivateReservation(resId: Long) {
-        reservationDao.deactivate(resId)
+        db.withTransaction {
+            reservationDao.deactivate(resId)
+            logEvent(resId, HistoryEventType.RESERVATION_CLOSED)
+        }
     }
 
     suspend fun deleteReservation(resId: Long) {
-        val res = reservationDao.getById(resId)
-        res?.let { reservationDao.delete(res) }
+        db.withTransaction {
+            val count = historyEntryDao.countByReservationId(resId)
+            check(count <= 1) { "Cannot hard-delete a reservation with history entries" }
+            val res = reservationDao.getById(resId) ?: return@withTransaction
+            reservationDao.delete(res)
+        }
     }
 
     suspend fun deleteStay(stayId: Long) {
-        val stay = stayDao.getById(stayId)
-        stay?.let { stayDao.delete(stay) }
+        db.withTransaction {
+            val stay = stayDao.getById(stayId) ?: return@withTransaction
+            val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            logEvent(stay.reservationId, HistoryEventType.STAY_DELETED, roomNumber?.let { "Room $it" })
+            stayDao.delete(stay)
+        }
     }
 
     suspend fun getStaysPerRoom(
@@ -238,14 +271,14 @@ class HotelRepository(
     // some functionality functions
 
     // requires stay Id to exist and be a legal stay Id
-    suspend fun confirmStay(
-        stayId: Long
-    ) {
-        val stay = stayDao.getById(stayId) // check added just in case for good practice
-            ?: throw IllegalStateException("Stay not found")
-
-        stayDao.updateStatus(stay.stayId, StayStatus.CONFIRMED)
-
+    suspend fun confirmStay(stayId: Long) {
+        db.withTransaction {
+            val stay = stayDao.getById(stayId)
+                ?: throw IllegalStateException("Stay not found")
+            stayDao.updateStatus(stay.stayId, StayStatus.CONFIRMED)
+            val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            logEvent(stay.reservationId, HistoryEventType.STAY_CONFIRMED, roomNumber?.let { "Room $it" })
+        }
     }
 
     // seems useful for like a clicking mechanism where it changes the room availability
@@ -340,20 +373,23 @@ class HotelRepository(
     }
 
 
-    suspend fun updateStay(stay: Stay): StayResult{
+    suspend fun updateStay(stay: Stay): StayResult {
         val overlapping = stayDao.hasOverlap(
             roomId = stay.roomId,
             checkIn = stay.checkInDate,
             checkOut = stay.checkOutDate,
-            excludeStayId = stay.stayId // important when editing
+            excludeStayId = stay.stayId
         )
-
-        // nights cannot be 0
-        // reservation cannot be changed -- only guest names
         return if (overlapping) {
             StayResult.Overlapping
         } else {
-            stayDao.update(stay)
+            db.withTransaction {
+                stayDao.update(stay)
+                if (stay.status == StayStatus.CONFIRMED) {
+                    val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
+                    logEvent(stay.reservationId, HistoryEventType.STAY_EDITED, roomNumber?.let { "Room $it" })
+                }
+            }
             StayResult.Success
         }
     }
@@ -389,15 +425,18 @@ class HotelRepository(
         checkOutDate: LocalDate,
         newRoomId: Long
     ): Boolean {
-        val hasOverlap = stayDao.hasOverlap(
-            newRoomId,
-            checkInDate,
-            checkOutDate,
-            stayId
-        )
+        val hasOverlap = stayDao.hasOverlap(newRoomId, checkInDate, checkOutDate, stayId)
         if (hasOverlap) return false
-        stayDao.updateRoom(stayId, newRoomId)
-        return true
+        return db.withTransaction {
+            val stay = stayDao.getById(stayId) ?: return@withTransaction false
+            val oldRoomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            val newRoomNumber = roomDao.getById(newRoomId)?.roomNumber
+            stayDao.updateRoom(stayId, newRoomId)
+            val note = if (oldRoomNumber != null && newRoomNumber != null)
+                "Room $oldRoomNumber → $newRoomNumber" else null
+            logEvent(stay.reservationId, HistoryEventType.ROOM_MOVED, note)
+            true
+        }
     }
 
 }

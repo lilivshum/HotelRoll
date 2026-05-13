@@ -18,6 +18,7 @@ import com.example.hotelroll.ui.roll.RollScreen
 import com.example.hotelroll.ui.stay.StayDetailScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.ui.createRes.CreateResScreen
+import com.example.hotelroll.ui.history.HistoryScreen
 import com.example.hotelroll.ui.stay.StayDetailViewModel
 import com.example.hotelroll.ui.stay.StayDetailViewModelFactory
 import java.time.LocalDate
@@ -120,6 +121,9 @@ fun HotelNavGraph(
                 },
                 onAddStay = { roomId, roomNumber, date, mode, stayId, reservationId ->
                     navController.navigate(HotelRoute.CreateStay.createRoute(roomId, roomNumber, date, mode, stayId, reservationId))
+                },
+                onHistoryClick = { resId ->
+                    navController.navigate(HotelRoute.History.createRoute(resId))
                 }
             )
         }
@@ -173,6 +177,19 @@ fun HotelNavGraph(
             )
         }
 
+        // History screen
+        composable(
+            route = HotelRoute.History.route,
+            arguments = listOf(
+                navArgument("reservationId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val reservationId = backStackEntry.arguments!!.getLong("reservationId")
+            HistoryScreen(
+                reservationId = reservationId,
+                onBackClick = { navController.navigateUp() }
+            )
+        }
 
     }
 }

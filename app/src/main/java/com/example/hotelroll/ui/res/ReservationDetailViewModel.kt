@@ -58,6 +58,9 @@ class ReservationDetailViewModel(
     var hasConfirmedStay by mutableStateOf(false)
         private set
 
+    var historyEntryCount by mutableStateOf(0)
+        private set
+
     // Edit mode fields
     var resName by mutableStateOf("")
     var noGuests by mutableStateOf(1)
@@ -92,6 +95,7 @@ class ReservationDetailViewModel(
             _staysUi.value = repository.getStaysUi(resId)
             notesFlow.value = _reservation.value?.notes.orEmpty()
             hasConfirmedStay = repository.hasConfirmedStay(resId)
+            historyEntryCount = repository.getHistoryEntryCount(resId)
             // seed edit fields from loaded reservation
             _reservation.value?.let { res ->
                 resName = res.resName
@@ -141,6 +145,17 @@ class ReservationDetailViewModel(
         viewModelScope.launch {
             try {
                 repository.deactivateReservation(resId)
+                onDone()
+            } catch (e: Exception) {
+                errorMessage = e.message
+            }
+        }
+    }
+
+    fun hardDeleteReservation(onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                repository.deleteReservation(resId)
                 onDone()
             } catch (e: Exception) {
                 errorMessage = e.message

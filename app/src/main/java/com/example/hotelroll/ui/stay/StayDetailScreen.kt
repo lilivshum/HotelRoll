@@ -84,9 +84,11 @@ fun StayDetailScreen(
     }
 
     if (showDeleteDialog) {
+        val stayLabel = if (stay?.status == com.example.hotelroll.data.model.StayStatus.CONFIRMED)
+            "confirmed stay" else "pending stay"
         ConfirmActionDialog(
             title = "Delete stay?",
-            body = "The confirmed stay in Room $roomNumber will be permanently deleted.",
+            body = "The $stayLabel in Room $roomNumber will be permanently deleted.",
             activeUserName = activeUser?.name ?: "Unknown",
             isDestructive = true,
             confirmLabel = "Delete",

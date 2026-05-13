@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.ui.createRes.DateField
+import com.example.hotelroll.ui.navigation.HotelRoute
 import com.example.hotelroll.ui.navigation.StayMode
 import com.example.hotelroll.ui.utilities.AppDatePickerDialog
 import com.example.hotelroll.ui.utilities.NotesEditor
@@ -50,7 +52,8 @@ fun ReservationDetailScreen(
     reservationId: Long,
     onBackClick: () -> Unit,
     onStayClick: (Long, String, String) -> Unit,
-    onAddStay: (roomId: Long, roomNumber: String, date: String, mode: StayMode, stayId: Long?, reservationId: Long?) -> Unit
+    onAddStay: (roomId: Long, roomNumber: String, date: String, mode: StayMode, stayId: Long?, reservationId: Long?) -> Unit,
+    onHistoryClick: (Long) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -72,6 +75,7 @@ fun ReservationDetailScreen(
     val stays = viewModel.staysUi.value
     val notes by viewModel.notes.collectAsState()
 
+    var showCloseDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isEditing by remember { mutableStateOf(false) }
 
@@ -117,6 +121,13 @@ fun ReservationDetailScreen(
                                 )
                             }
                         } else if (reservation.isActive) {
+                            IconButton(onClick = { onHistoryClick(reservationId) }) {
+                                Icon(
+                                    Icons.Default.History,
+                                    contentDescription = "History",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             IconButton(onClick = { isEditing = true }) {
                                 Icon(
                                     Icons.Default.Edit,
@@ -124,7 +135,10 @@ fun ReservationDetailScreen(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-                            IconButton(onClick = { showDeleteDialog = true }) {
+                            IconButton(onClick = {
+                                if (viewModel.historyEntryCount <= 1) showDeleteDialog = true
+                                else showCloseDialog = true
+                            }) {
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = "Close reservation",
@@ -232,7 +246,7 @@ fun ReservationDetailScreen(
             }
         }
 
-        if (showDeleteDialog) {
+        if (showCloseDialog) {
             ConfirmActionDialog(
                 title = "Close reservation?",
                 body = "\"${reservation.resName}\" will be moved to Past. It can still be viewed but not edited.",
@@ -240,8 +254,23 @@ fun ReservationDetailScreen(
                 isDestructive = true,
                 confirmLabel = "Close",
                 onConfirm = {
-                    showDeleteDialog = false
+                    showCloseDialog = false
                     viewModel.closeReservation { onBackClick() }
+                },
+                onDismiss = { showCloseDialog = false }
+            )
+        }
+
+        if (showDeleteDialog) {
+            ConfirmActionDialog(
+                title = "Delete reservation?",
+                body = "\"${reservation.resName}\" will be permanently deleted. This cannot be undone.",
+                activeUserName = activeUser?.name ?: "Unknown",
+                isDestructive = true,
+                confirmLabel = "Delete",
+                onConfirm = {
+                    showDeleteDialog = false
+                    viewModel.hardDeleteReservation { onBackClick() }
                 },
                 onDismiss = { showDeleteDialog = false }
             )

@@ -268,13 +268,7 @@ fun CreateStayScreen(
                 actions = {
                     if (mode == StayMode.EDIT) {
                         IconButton(
-                            onClick = {
-                                if (viewModel.stayStatus == StayStatus.CONFIRMED) {
-                                    showConfirmDeleteDialog = true
-                                } else {
-                                    viewModel.deleteStay { onSaved() }
-                                }
-                            }
+                            onClick = { showConfirmDeleteDialog = true }
                         ) {
                             Icon(
                                 Icons.Default.Delete,
@@ -638,9 +632,10 @@ fun CreateStayScreen(
             }
 
             if (showConfirmDeleteDialog) {
+                val stayLabel = if (viewModel.stayStatus == StayStatus.CONFIRMED) "confirmed stay" else "pending stay"
                 ConfirmActionDialog(
                     title = "Delete stay?",
-                    body = "The confirmed stay in Room $roomNumber will be permanently deleted.",
+                    body = "The $stayLabel in Room $roomNumber will be permanently deleted.",
                     activeUserName = activeUser?.name ?: "Unknown",
                     isDestructive = true,
                     confirmLabel = "Delete",

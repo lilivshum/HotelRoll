@@ -4,7 +4,6 @@ package com.example.hotelroll
 import android.app.Application
 import com.example.hotelroll.data.database.HotelDatabase
 import com.example.hotelroll.data.model.Currency
-import com.example.hotelroll.data.model.Reservation
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 import com.example.hotelroll.data.seed.DEFAULT_USERS
@@ -33,6 +32,7 @@ class HotelApplication : Application() {
             stayDao = database.stayDao(),
             roomDao = database.roomDao(),
             userDao = database.userDao(),
+            historyEntryDao = database.historyEntryDao(),
             manager = manager,
             context = applicationContext
         )
@@ -60,15 +60,13 @@ class HotelApplication : Application() {
         }
 
         if (reservationDao.countReservations() == 0) {
-            val resId1 = reservationDao.insert(
-                Reservation(
-                    resName = "Alice Smith",
-                    noGuests = 2,
-                    noKids = 2,
-                    checkInDate = LocalDate.now(),
-                    nights = 2,
-                    notes = "Late arrival"
-                )
+            val resId1 = repository.createReservation(
+                resName = "Alice Smith",
+                noGuests = 2,
+                noKids = 2,
+                notes = "Late arrival",
+                checkInDate = LocalDate.now(),
+                nights = 2
             )
 
             repository.assignRoom(
@@ -100,15 +98,13 @@ class HotelApplication : Application() {
             )
 
 
-            val resId2 = reservationDao.insert(
-                Reservation(
-                    resName = "Bob Johnson",
-                    noGuests = 1,
-                    checkInDate = LocalDate.now(),
-                    noKids = 0,
-                    nights = 5,
-                    notes = null
-                )
+            val resId2 = repository.createReservation(
+                resName = "Bob Johnson",
+                noGuests = 1,
+                noKids = 0,
+                notes = null,
+                checkInDate = LocalDate.now(),
+                nights = 5
             )
 
             repository.assignRoom(

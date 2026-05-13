@@ -40,4 +40,8 @@ sealed class HotelRoute(val route: String) {
         fun createRoute() = "reservation/create"
     }
 
+    object History : HotelRoute("history/{reservationId}") {
+        fun createRoute(reservationId: Long) = "history/$reservationId"
+    }
+
 }
