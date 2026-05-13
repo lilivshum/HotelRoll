@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import com.example.hotelroll.ui.utilities.StayUi
 
 private const val PREFS_NAME = "hotel_prefs"
@@ -42,6 +43,10 @@ class HotelRepository(
     val activeUserId: StateFlow<Long> = _activeUserId.asStateFlow()
 
     val allUsers: Flow<List<User>> = userDao.getAll()
+
+    val activeUser: Flow<User?> = combine(_activeUserId, allUsers) { id, users ->
+        users.find { it.id == id }
+    }
 
     fun setActiveUser(id: Long) {
         prefs.edit().putLong(KEY_ACTIVE_USER_ID, id).apply()

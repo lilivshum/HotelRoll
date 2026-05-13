@@ -3,11 +3,13 @@ package com.example.hotelroll.ui.stay
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import com.example.hotelroll.data.model.User
 import com.example.hotelroll.repository.HotelRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hotelroll.HotelApplication
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
 import com.example.hotelroll.data.model.Stay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -27,6 +30,9 @@ class StayDetailViewModel (
 ): ViewModel() {
 
     // 1️⃣ ViewModel OWNS the stayId
+    val activeUser: StateFlow<User?> = repository.activeUser
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
     private val stayId: Long=
         checkNotNull(savedStateHandle["stayId"]) {
             "stayId is required"

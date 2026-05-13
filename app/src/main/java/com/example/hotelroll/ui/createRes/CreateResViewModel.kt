@@ -5,9 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hotelroll.data.model.User
 import com.example.hotelroll.repository.HotelRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -18,6 +21,8 @@ class CreateResViewModel (
     private val repository: HotelRepository
 ): ViewModel() {
 
+    val activeUser: StateFlow<User?> = repository.activeUser
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     var resName by mutableStateOf("")
         private set

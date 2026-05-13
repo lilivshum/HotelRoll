@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hotelroll.data.dto.RollItem
+import com.example.hotelroll.data.model.User
 import com.example.hotelroll.repository.HotelRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,9 @@ import java.time.LocalDate
 class RollViewModel(
     private val repository: HotelRepository
 ) : ViewModel() {
+
+    val activeUser: StateFlow<User?> = repository.activeUser
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val _date = MutableStateFlow(LocalDate.now())
     val date: StateFlow<LocalDate> = _date
@@ -61,9 +65,21 @@ class RollViewModel(
         }
     }
 
+    var pendingMoveTarget by mutableStateOf<RollItem?>(null)
+        private set
+
+    fun requestMoveTarget(item: RollItem) {
+        pendingMoveTarget = item
+    }
+
+    fun clearPendingMove() {
+        pendingMoveTarget = null
+    }
+
     fun clearSelection() {
         selectedItem = null
         validTargetRoomIds = emptySet()
+        pendingMoveTarget = null
     }
 
     fun moveStayToRoom(

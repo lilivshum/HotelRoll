@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.example.hotelroll.ui.utilities.ConfirmActionDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +33,7 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
     )
     // Collect the list of RollItems from the ViewModel
     val rollItems by viewModel.roll.collectAsState(initial = emptyList())
+    val activeUser by viewModel.activeUser.collectAsState()
 
     // Scaffold is optional, but useful for padding/top bars
     Scaffold { paddingValues ->
@@ -78,5 +80,22 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
             // Table with horizontal scroll + vertical scrolling inside
             RollTable(rollItems = rollItems, onStayClick, onEmptyClick, date, viewModel)
         }
+    }
+
+    val pendingTarget = viewModel.pendingMoveTarget
+    val source = viewModel.selectedItem
+    if (pendingTarget != null && source != null) {
+        ConfirmActionDialog(
+            title = "Move stay?",
+            body = "Stay from Room ${source.roomNumber} will be moved to Room ${pendingTarget.roomNumber}.",
+            activeUserName = activeUser?.name ?: "Unknown",
+            onConfirm = {
+                viewModel.moveStayToRoom(source, pendingTarget.roomId) {}
+                viewModel.clearSelection()
+            },
+            onDismiss = {
+                viewModel.clearPendingMove()
+            }
+        )
     }
 }

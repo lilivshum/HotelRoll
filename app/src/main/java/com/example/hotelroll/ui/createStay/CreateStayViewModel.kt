@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.stateIn
 import java.time.temporal.ChronoUnit
 import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.RoomEntity
+import com.example.hotelroll.data.model.User
 
 class CreateStayViewModel(
     private val repository: HotelRepository,
@@ -36,6 +37,8 @@ class CreateStayViewModel(
 
 ): ViewModel() {
 
+    val activeUser: StateFlow<User?> = repository.activeUser
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     var roomId: Long by mutableStateOf(checkNotNull(savedStateHandle["roomId"]))
         private set

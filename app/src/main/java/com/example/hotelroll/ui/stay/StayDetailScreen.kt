@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.hotelroll.ui.utilities.ConfirmActionDialog
 import com.example.hotelroll.ui.utilities.NotesEditor
 
 
@@ -30,6 +31,7 @@ fun StayDetailScreen(
 ) {
     val stay by viewModel.stay.collectAsState()
     val notes by viewModel.notes.collectAsState()
+    val activeUser by viewModel.activeUser.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -82,23 +84,17 @@ fun StayDetailScreen(
     }
 
     if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.deleteStay { onDeleted?.invoke() }
-                        showDeleteDialog = false
-                    }
-                ) { Text("Delete") }
+        ConfirmActionDialog(
+            title = "Delete stay?",
+            body = "The confirmed stay in Room $roomNumber will be permanently deleted.",
+            activeUserName = activeUser?.name ?: "Unknown",
+            isDestructive = true,
+            confirmLabel = "Delete",
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteStay { onDeleted?.invoke() }
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            },
-            title = { Text("Delete Stay?") },
-            text = { Text("This action cannot be undone.") }
+            onDismiss = { showDeleteDialog = false }
         )
     }
 }

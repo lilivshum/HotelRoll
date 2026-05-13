@@ -26,6 +26,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.ui.utilities.AppDatePickerDialog
+import com.example.hotelroll.ui.utilities.ConfirmActionDialog
 import java.time.format.DateTimeFormatter
 
 private val dateFormatter =
@@ -65,6 +67,9 @@ fun CreateResScreen (
         factory = CreateResViewModelFactory(repository = app.repository)
     )
 
+
+    val activeUser by viewModel.activeUser.collectAsState()
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     // Local string state for numeric fields — avoids snap-back when deleting digits
     var guestsText by remember(viewModel.noGuests) { mutableStateOf(viewModel.noGuests.toString()) }
@@ -174,12 +179,7 @@ fun CreateResScreen (
                     Text("Cancel")
                 }
 
-                Button(onClick = {
-                    viewModel.save {
-                        viewModel.reset()
-                        onSave()
-                    }
-                }) {
+                Button(onClick = { showConfirmDialog = true }) {
                     Text("Save")
                 }
 
@@ -187,6 +187,22 @@ fun CreateResScreen (
 
         }
 
+    }
+
+    if (showConfirmDialog) {
+        ConfirmActionDialog(
+            title = "Create reservation?",
+            body = "A new reservation will be created for \"${viewModel.resName}\".",
+            activeUserName = activeUser?.name ?: "Unknown",
+            onConfirm = {
+                showConfirmDialog = false
+                viewModel.save {
+                    viewModel.reset()
+                    onSave()
+                }
+            },
+            onDismiss = { showConfirmDialog = false }
+        )
     }
 
     // Date picker code -- chatgpt generated dont ask me anything about it

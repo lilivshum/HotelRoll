@@ -13,14 +13,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.example.hotelroll.HotelApplication
 import com.example.hotelroll.data.model.Reservation
+import com.example.hotelroll.data.model.User
 import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.ui.utilities.StayUi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 
 @OptIn(FlowPreview::class)
@@ -28,6 +31,9 @@ class ReservationDetailViewModel(
     private val repository: HotelRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    val activeUser: StateFlow<User?> = repository.activeUser
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val resId: Long =
         checkNotNull(savedStateHandle["reservationId"]) {

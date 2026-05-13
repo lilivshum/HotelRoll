@@ -57,6 +57,7 @@ import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.ui.createRes.DateField
+import com.example.hotelroll.ui.utilities.ConfirmActionDialog
 import com.example.hotelroll.ui.utilities.NotesEditor
 import com.example.hotelroll.ui.navigation.StayMode
 import com.example.hotelroll.ui.utilities.AppDatePickerDialog
@@ -207,12 +208,17 @@ fun CreateStayScreen(
         )
     }
 
+    val activeUser by viewModel.activeUser.collectAsState()
+
     var activeDateField by remember { mutableStateOf<DateField?>(null) }
     var showRoomPickerDialog by remember { mutableStateOf(false) }
     var roomSearchText by remember { mutableStateOf("") }
     var roomDropdownExpanded by remember { mutableStateOf(false) }
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showConfirmCreateDialog by remember { mutableStateOf(false) }
+    var showConfirmEditDialog by remember { mutableStateOf(false) }
+    var showConfirmConfirmDialog by remember { mutableStateOf(false) }
+    var showConfirmDeleteDialog by remember { mutableStateOf(false) }
 
 
     Scaffold(
@@ -262,7 +268,13 @@ fun CreateStayScreen(
                 actions = {
                     if (mode == StayMode.EDIT) {
                         IconButton(
-                            onClick = { showDeleteDialog = true }
+                            onClick = {
+                                if (viewModel.stayStatus == StayStatus.CONFIRMED) {
+                                    showConfirmDeleteDialog = true
+                                } else {
+                                    viewModel.deleteStay { onSaved() }
+                                }
+                            }
                         ) {
                             Icon(
                                 Icons.Default.Delete,
@@ -273,12 +285,7 @@ fun CreateStayScreen(
 
                         if (viewModel.stayStatus == StayStatus.PENDING) {
                             IconButton(
-                                onClick = {
-                                    viewModel.confirmStay {
-                                        viewModel.reset()
-                                        onSaved()
-                                    }
-                                }
+                                onClick = { showConfirmConfirmDialog = true }
                             ) {
                                 Icon(
                                     Icons.Default.AddTask,
@@ -441,7 +448,9 @@ fun CreateStayScreen(
             OutlinedButton(
                 onClick = {
                     if (mode == StayMode.CREATE) {
-                        viewModel.save { onSaved() }
+                        showConfirmCreateDialog = true
+                    } else if (viewModel.stayStatus == StayStatus.CONFIRMED) {
+                        showConfirmEditDialog = true
                     } else {
                         viewModel.save {
                             viewModel.reset()
@@ -589,24 +598,63 @@ fun CreateStayScreen(
                 )
             }
 
-            if (showDeleteDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteDialog = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                viewModel.deleteStay { onSaved() }
-                                showDeleteDialog = false
-                            }
-                        ) { Text("Delete") }
+            if (showConfirmCreateDialog) {
+                ConfirmActionDialog(
+                    title = "Create stay?",
+                    body = "A new stay will be created in Room $roomNumber.",
+                    activeUserName = activeUser?.name ?: "Unknown",
+                    onConfirm = {
+                        showConfirmCreateDialog = false
+                        viewModel.save { onSaved() }
                     },
-                    dismissButton = {
-                        TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel")
+                    onDismiss = { showConfirmCreateDialog = false }
+                )
+            }
+
+            if (showConfirmEditDialog) {
+                ConfirmActionDialog(
+                    title = "Save changes?",
+                    body = "Changes to the confirmed stay in Room $roomNumber will be saved.",
+                    activeUserName = activeUser?.name ?: "Unknown",
+                    onConfirm = {
+                        showConfirmEditDialog = false
+                        viewModel.save {
+                            viewModel.reset()
+                            onSaved()
                         }
                     },
-                    title = { Text("Delete Stay?") },
-                    text = { Text("This action cannot be undone.") }
+                    onDismiss = { showConfirmEditDialog = false }
+                )
+            }
+
+            if (showConfirmConfirmDialog) {
+                ConfirmActionDialog(
+                    title = "Confirm stay?",
+                    body = "Stay in Room $roomNumber will be marked as confirmed.",
+                    activeUserName = activeUser?.name ?: "Unknown",
+                    onConfirm = {
+                        showConfirmConfirmDialog = false
+                        viewModel.confirmStay {
+                            viewModel.reset()
+                            onSaved()
+                        }
+                    },
+                    onDismiss = { showConfirmConfirmDialog = false }
+                )
+            }
+
+            if (showConfirmDeleteDialog) {
+                ConfirmActionDialog(
+                    title = "Delete stay?",
+                    body = "The confirmed stay in Room $roomNumber will be permanently deleted.",
+                    activeUserName = activeUser?.name ?: "Unknown",
+                    isDestructive = true,
+                    confirmLabel = "Delete",
+                    onConfirm = {
+                        showConfirmDeleteDialog = false
+                        viewModel.deleteStay { onSaved() }
+                    },
+                    onDismiss = { showConfirmDeleteDialog = false }
                 )
             }
 

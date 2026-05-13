@@ -20,11 +20,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
+import com.example.hotelroll.ui.utilities.ConfirmActionDialog
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -64,6 +63,7 @@ fun ReservationDetailScreen(
         viewModel.loadReservationInfo()
     }
 
+    val activeUser by viewModel.activeUser.collectAsState()
     val reservation = viewModel.reservation.value
     val stays = viewModel.staysUi.value
     val notes by viewModel.notes.collectAsState()
@@ -210,23 +210,17 @@ fun ReservationDetailScreen(
         }
 
         if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.closeReservation { onBackClick() }
-                            showDeleteDialog = false
-                        }
-                    ) { Text("Close") }
+            ConfirmActionDialog(
+                title = "Close reservation?",
+                body = "\"${reservation.resName}\" will be moved to Past. It can still be viewed but not edited.",
+                activeUserName = activeUser?.name ?: "Unknown",
+                isDestructive = true,
+                confirmLabel = "Close",
+                onConfirm = {
+                    showDeleteDialog = false
+                    viewModel.closeReservation { onBackClick() }
                 },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("Cancel")
-                    }
-                },
-                title = { Text("Close ${reservation.resName}?") },
-                text = { Text("This reservation will be moved to Past. It can still be viewed but not edited.") }
+                onDismiss = { showDeleteDialog = false }
             )
         }
 

@@ -73,10 +73,14 @@ fun RoomRow(
                     when {
                         // tap source row → deselect
                         isSource -> viewModel.clearSelection()
-                        // tap a valid destination row → move stay
+                        // tap a valid destination row → move stay (confirm first if CONFIRMED)
                         isDropTarget -> {
-                            viewModel.moveStayToRoom(selectedItem!!, item.roomId) {}
-                            viewModel.clearSelection()
+                            if (selectedItem!!.stayStatus == StayStatus.CONFIRMED) {
+                                viewModel.requestMoveTarget(item)
+                            } else {
+                                viewModel.moveStayToRoom(selectedItem!!, item.roomId) {}
+                                viewModel.clearSelection()
+                            }
                         }
                         // in move mode but not a valid target — block all navigation
                         selectedItem != null -> { }
