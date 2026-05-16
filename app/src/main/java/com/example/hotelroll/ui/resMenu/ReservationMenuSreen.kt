@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -39,7 +40,8 @@ import com.example.hotelroll.data.model.User
 fun ReservationMenuScreen(
     viewModel: ReservationViewModel,
     onReservationClick: (Long) -> Unit,
-    onAddReservationClick: () -> Unit
+    onAddReservationClick: () -> Unit,
+    onSettingsClick: () -> Unit = {}
 ) {
     val activeReservations by viewModel.activeReservations.collectAsState()
     val pastReservations by viewModel.pastReservations.collectAsState()
@@ -104,7 +106,7 @@ fun ReservationMenuScreen(
             }
         }
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(modifier = Modifier.weight(1f).padding(bottom = 4.dp)) {
             // Active reservations
             items(activeReservations) { item ->
                 Text(
@@ -155,6 +157,28 @@ fun ReservationMenuScreen(
                     }
                 }
             }
+        }
+
+        // Settings button at the bottom
+        HorizontalDivider(modifier = Modifier.padding(top = 4.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onSettingsClick() }
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 

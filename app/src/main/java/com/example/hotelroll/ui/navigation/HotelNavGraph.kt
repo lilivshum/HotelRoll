@@ -19,6 +19,7 @@ import com.example.hotelroll.ui.stay.StayDetailScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.ui.createRes.CreateResScreen
 import com.example.hotelroll.ui.history.HistoryScreen
+import com.example.hotelroll.ui.settings.SettingsScreen
 import com.example.hotelroll.ui.stay.StayDetailViewModel
 import com.example.hotelroll.ui.stay.StayDetailViewModelFactory
 import java.time.LocalDate
@@ -33,6 +34,7 @@ enum class StayMode{
 fun HotelNavGraph(
     modifier: Modifier = Modifier,
     onMenuClick: () -> Unit,
+    onSettingsClick: () -> Unit = {},
     navController: NavHostController
 ) {
     val app = LocalContext.current.applicationContext as HotelApplication
@@ -188,6 +190,13 @@ fun HotelNavGraph(
             HistoryScreen(
                 reservationId = reservationId,
                 onBackClick = { navController.navigateUp() }
+            )
+        }
+
+        // Settings screen
+        composable(route = HotelRoute.Settings.route) {
+            SettingsScreen(
+                onBack = { navController.navigateUp() }
             )
         }
 

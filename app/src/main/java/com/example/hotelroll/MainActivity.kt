@@ -54,6 +54,11 @@ class MainActivity : ComponentActivity() {
                 val windowSizeClass = calculateWindowSizeClass(this)
                 val isTablet = windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
 
+                val onSettingsClick = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate(HotelRoute.Settings.route)
+                }
+
                 if (isTablet) {
                     Surface(
                         modifier = Modifier
@@ -64,28 +69,22 @@ class MainActivity : ComponentActivity() {
                         ReservationMenuScreen(
                             reservationViewModel,
                             onReservationClick = { resId ->
-
                                 navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
+                                scope.launch { drawerState.close() }
+                            },
+                            onAddReservationClick = {
                                 scope.launch {
                                     drawerState.close()
+                                    navController.navigate(HotelRoute.CreateRes.createRoute())
                                 }
                             },
-
-                            onAddReservationClick = {
-                               scope.launch {
-                                   drawerState.close()
-                                   navController.navigate(HotelRoute.CreateRes.createRoute())
-                               }
-                            }
-
+                            onSettingsClick = { onSettingsClick() }
                         )
 
                         HotelNavGraph(
                             onMenuClick = { },
                             navController = navController
                         )
-
-
                     }
                 } else {
                     ModalNavigationDrawer(
@@ -96,19 +95,17 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 ReservationMenuScreen(
                                     viewModel = reservationViewModel,
-                                    onReservationClick = {
-                                        resId ->
+                                    onReservationClick = { resId ->
                                         navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
-                                        scope.launch {
-                                            drawerState.close()
-                                        }
+                                        scope.launch { drawerState.close() }
                                     },
                                     onAddReservationClick = {
                                         scope.launch {
                                             drawerState.close()
                                             navController.navigate(HotelRoute.CreateRes.createRoute())
                                         }
-                                    }
+                                    },
+                                    onSettingsClick = { onSettingsClick() }
                                 )
                             }
                         }
@@ -120,7 +117,6 @@ class MainActivity : ComponentActivity() {
                             navController = navController
                         )
                     }
-
                 }
 
             }
