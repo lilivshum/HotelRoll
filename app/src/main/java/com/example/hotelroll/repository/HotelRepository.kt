@@ -418,6 +418,28 @@ class HotelRepository(
         return allRooms.firstOrNull { it.roomId !in blocked }
     }
 
+    // splits a stay at splitDate and moves the remainder to a new room
+    suspend fun splitAndMoveStay(
+        stayId: Long,
+        splitDate: LocalDate,
+        newRoomId: Long
+    ): Boolean {
+        val stay = stayDao.getById(stayId) ?: return false
+        val hasOverlap = stayDao.hasOverlap(newRoomId, splitDate, stay.checkOutDate, -1L)
+        if (hasOverlap) return false
+        return db.withTransaction {
+            val oldRoomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            val newRoomNumber = roomDao.getById(newRoomId)?.roomNumber
+            stayDao.updateCheckOut(stayId, splitDate)
+            stayDao.insert(stay.copy(stayId = 0L, roomId = newRoomId, checkInDate = splitDate))
+            val note = if (oldRoomNumber != null && newRoomNumber != null)
+                "Room $oldRoomNumber → $newRoomNumber from ${splitDate.monthValue}/${splitDate.dayOfMonth}"
+            else null
+            logEvent(stay.reservationId, HistoryEventType.ROOM_MOVED, note)
+            true
+        }
+    }
+
     // function that moves stay to another room
     suspend fun tryMoveStay(
         stayId: Long,

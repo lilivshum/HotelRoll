@@ -94,7 +94,7 @@ fun RoomRow(
                     }
                 },
                 onLongClick = {
-                    if (item.stayId != null) viewModel.selectItem(item)
+                    if (item.stayId != null) viewModel.onLongPress(item, date)
                 }
             ),
         verticalAlignment = Alignment.CenterVertically

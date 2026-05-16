@@ -131,6 +131,16 @@ SELECT EXISTS(
     )
 
     @Query("""
+    UPDATE stays
+    SET checkOutDate = :checkOut
+    WHERE stayId = :stayId
+""")
+    suspend fun updateCheckOut(
+        stayId: Long,
+        checkOut: LocalDate
+    )
+
+    @Query("""
         SELECT DISTINCT roomId FROM stays
         WHERE stayId != :excludeStayId
         AND :checkIn < checkOutDate

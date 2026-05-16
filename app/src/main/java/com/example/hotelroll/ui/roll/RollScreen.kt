@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -82,12 +84,38 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
         }
     }
 
+    val pendingAction = viewModel.pendingActionItem
+    val pendingActionDate = viewModel.pendingActionDate
+    if (pendingAction != null && pendingActionDate != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissActionPicker() },
+            title = { Text("Move stay in Room ${pendingAction.roomNumber}") },
+            text = { Text("Move the entire stay, or split it here and move from ${pendingActionDate.monthValue}/${pendingActionDate.dayOfMonth} onward?") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.confirmAction(pendingActionDate) }) {
+                    Text("Split from ${pendingActionDate.monthValue}/${pendingActionDate.dayOfMonth}")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.confirmAction(null) }) {
+                    Text("Move entire stay")
+                }
+            }
+        )
+    }
+
     val pendingTarget = viewModel.pendingMoveTarget
     val source = viewModel.selectedItem
     if (pendingTarget != null && source != null) {
+        val split = viewModel.splitDate
+        val isSplit = split != null && split != source.checkInDate
+        val dialogBody = if (isSplit)
+            "Stay from Room ${source.roomNumber} will be split on ${split!!.monthValue}/${split.dayOfMonth}. From that date it will continue in Room ${pendingTarget.roomNumber}."
+        else
+            "Stay from Room ${source.roomNumber} will be moved to Room ${pendingTarget.roomNumber}."
         ConfirmActionDialog(
-            title = "Move stay?",
-            body = "Stay from Room ${source.roomNumber} will be moved to Room ${pendingTarget.roomNumber}.",
+            title = if (isSplit) "Split stay?" else "Move stay?",
+            body = dialogBody,
             activeUserName = activeUser?.name ?: "Unknown",
             onConfirm = {
                 viewModel.moveStayToRoom(source, pendingTarget.roomId) {}

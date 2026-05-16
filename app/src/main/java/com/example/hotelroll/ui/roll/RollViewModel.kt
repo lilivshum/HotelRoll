@@ -44,19 +44,52 @@ class RollViewModel(
     fun nextDay() { _date.value = _date.value.plusDays(1) }
     fun prevDay() { _date.value = _date.value.minusDays(1) }
 
+    // action picker state — shown when long-pressing a stay mid-stay
+    var pendingActionItem by mutableStateOf<RollItem?>(null)
+        private set
+    var pendingActionDate by mutableStateOf<LocalDate?>(null)
+        private set
+
+    fun onLongPress(item: RollItem, date: LocalDate) {
+        if (date == item.checkInDate) {
+            // at check-in date: skip dialog, full move directly
+            selectItem(item, date)
+        } else {
+            pendingActionItem = item
+            pendingActionDate = date
+        }
+    }
+
+    fun confirmAction(splitDate: LocalDate?) {
+        val item = pendingActionItem ?: return
+        val date = splitDate ?: item.checkInDate!!
+        pendingActionItem = null
+        pendingActionDate = null
+        selectItem(item, date)
+    }
+
+    fun dismissActionPicker() {
+        pendingActionItem = null
+        pendingActionDate = null
+    }
+
     // tap-to-select, tap-to-place room move
     var selectedItem by mutableStateOf<RollItem?>(null)
+        private set
+
+    var splitDate by mutableStateOf<LocalDate?>(null)
         private set
 
     var validTargetRoomIds by mutableStateOf<Set<Long>>(emptySet())
         private set
 
-    fun selectItem(item: RollItem) {
+    fun selectItem(item: RollItem, date: LocalDate) {
         selectedItem = item
+        splitDate = date
         validTargetRoomIds = emptySet()
         viewModelScope.launch {
             val blocked = repository.getBlockedRoomIds(
-                checkIn = item.checkInDate!!,
+                checkIn = date,
                 checkOut = item.checkOutDate!!,
                 excludeStayId = item.stayId!!
             ).toSet()
@@ -78,6 +111,7 @@ class RollViewModel(
 
     fun clearSelection() {
         selectedItem = null
+        splitDate = null
         validTargetRoomIds = emptySet()
         pendingMoveTarget = null
     }
@@ -88,12 +122,21 @@ class RollViewModel(
         onResult: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
-            val success = repository.tryMoveStay(
-                stayId = item.stayId!!,
-                checkInDate = item.checkInDate!!,
-                checkOutDate = item.checkOutDate!!,
-                newRoomId = newRoomId
-            )
+            val split = splitDate
+            val success = if (split == null || split == item.checkInDate) {
+                repository.tryMoveStay(
+                    stayId = item.stayId!!,
+                    checkInDate = item.checkInDate!!,
+                    checkOutDate = item.checkOutDate!!,
+                    newRoomId = newRoomId
+                )
+            } else {
+                repository.splitAndMoveStay(
+                    stayId = item.stayId!!,
+                    splitDate = split,
+                    newRoomId = newRoomId
+                )
+            }
             onResult(success)
         }
     }
