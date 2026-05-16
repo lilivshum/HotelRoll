@@ -6,5 +6,6 @@ data class GanttRoomRow(
     val roomId: Long,
     val roomNumber: String,
     val stays: List<Stay>,
-    val stayDisplayNames: Map<Long, String>  // stayId → stayName ?: reservationName
+    val stayDisplayNames: Map<Long, String>,  // stayId → stayName ?: reservationName
+    val isBlocked: Boolean = false
 )

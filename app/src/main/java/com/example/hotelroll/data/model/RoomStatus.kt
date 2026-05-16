@@ -5,4 +5,5 @@ package com.example.hotelroll.data.model
 enum class RoomStatus {
     AVAILABLE,
     UNAVAILABLE,
+    BLOCKED,
 }

@@ -299,6 +299,10 @@ class HotelRepository(
 
     }
 
+    suspend fun toggleRoomBlock(roomId: Long) {
+        roomDao.toggleBlock(roomId)
+    }
+
     // for detail viewing in ui
     fun getRoomRoll(date: LocalDate): Flow<List<RollItem>>{
         return roomDao.getRoll(date = date)
@@ -437,7 +441,8 @@ class HotelRepository(
                     roomId = room.roomId,
                     roomNumber = room.roomNumber,
                     stays = staysByRoom[room.roomId] ?: emptyList(),
-                    stayDisplayNames = displayNames
+                    stayDisplayNames = displayNames,
+                    isBlocked = room.status == RoomStatus.BLOCKED
                 )
             }
         }

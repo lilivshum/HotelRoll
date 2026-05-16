@@ -54,13 +54,22 @@ fun GanttRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Fixed room label — does not scroll
-        Text(
-            text = row.roomNumber,
+        Box(
             modifier = Modifier
                 .width(GANTT_LABEL_WIDTH)
-                .padding(start = 8.dp),
-            style = MaterialTheme.typography.bodySmall
-        )
+                .fillMaxHeight()
+                .background(
+                    if (row.isBlocked) Color(0xFFFF9800).copy(alpha = 0.18f)
+                    else Color.Transparent
+                ),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = row.roomNumber,
+                modifier = Modifier.padding(start = 8.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
 
         // Scrollable day cells
         Row(modifier = Modifier.horizontalScroll(scrollState)) {
@@ -76,6 +85,8 @@ fun GanttRow(
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
                     stay != null ->
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+                    row.isBlocked ->
+                        Color(0xFFFF9800).copy(alpha = 0.18f)
                     isToday ->
                         MaterialTheme.colorScheme.surfaceVariant
                     else -> Color.Transparent

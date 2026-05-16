@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.hotelroll.data.dto.RollItem
 import com.example.hotelroll.data.model.Currency
+import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.ui.navigation.StayMode
@@ -42,8 +43,10 @@ fun RoomRow(
     val selectedItem = viewModel.selectedItem
     val isSource = selectedItem?.roomId == item.roomId
     val isDropTarget = selectedItem != null && !isSource && item.roomId in viewModel.validTargetRoomIds
+    val isBlocked = item.roomStatus == RoomStatus.BLOCKED
 
     val backgroundColor = when {
+        isBlocked -> Color(0xFFFF9800).copy(alpha = 0.22f)
         isDropTarget -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
         isSource -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         item.stayStatus == StayStatus.CONFIRMED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
@@ -94,7 +97,10 @@ fun RoomRow(
                     }
                 },
                 onLongClick = {
-                    if (item.stayId != null) viewModel.onLongPress(item, date)
+                    when {
+                        item.stayId != null -> viewModel.onLongPress(item, date)
+                        else -> viewModel.onLongPressEmpty(item)
+                    }
                 }
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -106,9 +112,7 @@ fun RoomRow(
         )
 
         Box(modifier = Modifier.weight(RollColumns.NAME)) {
-            if (item.stayId != null) {
-                StayCard(item, viewModel)
-            }
+            if (item.stayId != null) StayCard(item, viewModel)
         }
 
         val pax = item.peopleInRoom?.let {

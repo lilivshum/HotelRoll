@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hotelroll.data.dto.RollItem
+import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.User
 import com.example.hotelroll.repository.HotelRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -96,14 +97,38 @@ class RollViewModel(
         splitDate = date
         validTargetRoomIds = emptySet()
         viewModelScope.launch {
-            val blocked = repository.getBlockedRoomIds(
+            val blockedByStay = repository.getBlockedRoomIds(
                 checkIn = date,
                 checkOut = item.checkOutDate!!,
                 excludeStayId = item.stayId!!
             ).toSet()
+            val blockedByStatus = roll.value
+                .filter { it.roomStatus == RoomStatus.BLOCKED }
+                .map { it.roomId }
+                .toSet()
             val allRoomIds = roll.value.map { it.roomId }.toSet()
-            validTargetRoomIds = allRoomIds - blocked - item.roomId
+            validTargetRoomIds = allRoomIds - blockedByStay - blockedByStatus - item.roomId
         }
+    }
+
+    // block/unblock state — triggered by long-pressing an empty (no-stay) cell
+    var pendingBlockItem by mutableStateOf<RollItem?>(null)
+        private set
+
+    fun onLongPressEmpty(item: RollItem) {
+        pendingBlockItem = item
+    }
+
+    fun confirmBlockToggle() {
+        val item = pendingBlockItem ?: return
+        pendingBlockItem = null
+        viewModelScope.launch {
+            repository.toggleRoomBlock(item.roomId)
+        }
+    }
+
+    fun dismissBlockDialog() {
+        pendingBlockItem = null
     }
 
     var pendingMoveTarget by mutableStateOf<RollItem?>(null)

@@ -115,6 +115,24 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
         )
     }
 
+    val pendingBlock = viewModel.pendingBlockItem
+    if (pendingBlock != null) {
+        val isCurrentlyBlocked = pendingBlock.roomStatus == com.example.hotelroll.data.model.RoomStatus.BLOCKED
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissBlockDialog() },
+            title = { Text(if (isCurrentlyBlocked) "Unblock Room ${pendingBlock.roomNumber}?" else "Block Room ${pendingBlock.roomNumber}?") },
+            text = { Text(if (isCurrentlyBlocked) "This room will be marked as available again." else "This room will be marked as blocked. It will still appear in the roll but cannot receive move-drop assignments.") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.confirmBlockToggle() }) {
+                    Text(if (isCurrentlyBlocked) "Unblock" else "Block")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissBlockDialog() }) { Text("Cancel") }
+            }
+        )
+    }
+
     val pendingTarget = viewModel.pendingMoveTarget
     val source = viewModel.selectedItem
     if (pendingTarget != null && source != null) {

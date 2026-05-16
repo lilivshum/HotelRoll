@@ -52,14 +52,15 @@ interface RoomDao {
                r.roomNumber AS roomNumber,
                COALESCE(s.stayName, res.resName) AS reservationName,
                s.peopleInRoom AS peopleInRoom,
-                s. kidsInRoom AS kidsInRoom, 
-               COALESCE(s.tariff, r.tariff) AS tariff, 
+               s.kidsInRoom AS kidsInRoom,
+               COALESCE(s.tariff, r.tariff) AS tariff,
                s.stayId AS stayId,
                s.tariffType AS tariffType,
                s.status AS stayStatus,
                s.currency AS currency,
                s.checkInDate AS checkInDate,
-               s.checkOutDate AS checkOutDate
+               s.checkOutDate AS checkOutDate,
+               r.status AS roomStatus
         FROM rooms r
         LEFT JOIN stays s ON s.roomId = r.roomId
             AND :date >= s.checkInDate
@@ -68,6 +69,13 @@ interface RoomDao {
         ORDER BY r.roomNumber
     """)
     fun getRoll(date: LocalDate): Flow<List<RollItem>>
+
+    @Query("""
+        UPDATE rooms
+        SET status = CASE WHEN status = 'BLOCKED' THEN 'AVAILABLE' ELSE 'BLOCKED' END
+        WHERE roomId = :roomId
+    """)
+    suspend fun toggleBlock(roomId: Long)
 
     @Query("SELECT * FROM rooms WHERE roomNumber = :roomNumber LIMIT 1")
     suspend fun getByRoomNumber(roomNumber: String): RoomEntity?

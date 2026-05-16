@@ -6,6 +6,7 @@ import androidx.room.TypeConverter
 import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.HistoryEventType
 import java.time.LocalDate
+import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 
@@ -52,5 +53,12 @@ class Converters {
     @TypeConverter
     fun toHistoryEventType(value: String?): HistoryEventType? =
         value?.let { HistoryEventType.valueOf(it) }
+
+    @TypeConverter
+    fun fromRoomStatus(value: RoomStatus?): String? = value?.name
+
+    @TypeConverter
+    fun toRoomStatus(value: String?): RoomStatus? =
+        value?.let { RoomStatus.valueOf(it) }
 
 }

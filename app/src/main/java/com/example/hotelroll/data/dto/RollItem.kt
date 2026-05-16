@@ -1,6 +1,7 @@
 package com.example.hotelroll.data.dto
 
 import com.example.hotelroll.data.model.Currency
+import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.model.TariffType
 import java.time.LocalDate
@@ -19,4 +20,5 @@ class RollItem (
     val currency: Currency?,
     val checkInDate: LocalDate?,
     val checkOutDate: LocalDate?,
+    val roomStatus: RoomStatus?,
 )
