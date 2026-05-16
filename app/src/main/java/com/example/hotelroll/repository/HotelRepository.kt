@@ -28,6 +28,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import java.time.YearMonth
+import com.example.hotelroll.data.dto.GanttRoomRow
 import com.example.hotelroll.ui.utilities.StayUi
 
 private const val PREFS_NAME = "hotel_prefs"
@@ -416,6 +419,28 @@ class HotelRepository(
         val allRooms = roomDao.getAll()
         val blocked = stayDao.getBlockedRoomIds(checkIn, checkOut, -1L).toSet()
         return allRooms.firstOrNull { it.roomId !in blocked }
+    }
+
+    fun getGanttRooms(yearMonth: YearMonth): Flow<List<GanttRoomRow>> {
+        val start = yearMonth.atDay(1)
+        val end = yearMonth.atEndOfMonth().plusDays(1)
+        return stayDao.getStaysInRange(start, end).map { stays ->
+            val allRooms = roomDao.getAll()
+            val resNames = stays.map { it.reservationId }.toSet()
+                .associateWith { id -> reservationDao.getById(id)?.resName ?: "" }
+            val displayNames = stays.associate { stay ->
+                stay.stayId to (stay.stayName?.takeIf { it.isNotBlank() } ?: resNames[stay.reservationId] ?: "")
+            }
+            val staysByRoom = stays.groupBy { it.roomId }
+            allRooms.map { room ->
+                GanttRoomRow(
+                    roomId = room.roomId,
+                    roomNumber = room.roomNumber,
+                    stays = staysByRoom[room.roomId] ?: emptyList(),
+                    stayDisplayNames = displayNames
+                )
+            }
+        }
     }
 
     // splits a stay at splitDate and moves the remainder to a new room

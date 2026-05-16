@@ -21,6 +21,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hotelroll.HotelApplication
+import com.example.hotelroll.ui.gantt.GanttScreen
+import com.example.hotelroll.ui.gantt.GanttViewModel
+import com.example.hotelroll.ui.gantt.GanttViewModelFactory
 import com.example.hotelroll.ui.navigation.StayMode
 import com.example.hotelroll.ui.roll.DateHeader
 
@@ -30,12 +33,11 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                onMenuClick: () -> Unit,
                onEmptyClick: (Long, String, String, StayMode, Long?) -> Unit
 ) {
-    val viewModel: RollViewModel = viewModel(
-        factory = RollViewModelFactory(app.repository)
-    )
-    // Collect the list of RollItems from the ViewModel
+    val viewModel: RollViewModel = viewModel(factory = RollViewModelFactory(app.repository))
+    val ganttViewModel: GanttViewModel = viewModel(factory = GanttViewModelFactory(app.repository))
     val rollItems by viewModel.roll.collectAsState(initial = emptyList())
     val activeUser by viewModel.activeUser.collectAsState()
+    val ganttMonth by ganttViewModel.month.collectAsState()
 
     // Scaffold is optional, but useful for padding/top bars
     Scaffold { paddingValues ->
@@ -48,39 +50,48 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                 onPrevious = viewModel::prevDay,
                 onNext = viewModel::nextDay,
                 onMenuClick = onMenuClick,
-                viewModel
+                viewModel = viewModel,
+                isGanttView = viewModel.showGantt,
+                onToggleView = viewModel::toggleGantt,
+                ganttMonth = ganttMonth,
+                onPrevMonth = ganttViewModel::prevMonth,
+                onNextMonth = ganttViewModel::nextMonth
             )
 
-            // Move mode cancel banner
-            if (viewModel.selectedItem != null) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Moving room ${viewModel.selectedItem!!.roomNumber} — tap a destination",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(onClick = viewModel::clearSelection) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Cancel move",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+            if (viewModel.showGantt) {
+                GanttScreen(viewModel = ganttViewModel)
             } else {
-                Spacer(modifier = Modifier.height(8.dp))
+                // Move mode cancel banner
+                if (viewModel.selectedItem != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Moving room ${viewModel.selectedItem!!.roomNumber} — tap a destination",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = viewModel::clearSelection) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cancel move",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                rollItems.forEach { println(it) }
+
+                // Table with horizontal scroll + vertical scrolling inside
+                RollTable(rollItems = rollItems, onStayClick, onEmptyClick, date, viewModel)
             }
-
-            rollItems.forEach { println(it) }
-
-            // Table with horizontal scroll + vertical scrolling inside
-            RollTable(rollItems = rollItems, onStayClick, onEmptyClick, date, viewModel)
         }
     }
 

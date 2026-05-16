@@ -44,6 +44,14 @@ class RollViewModel(
     fun nextDay() { _date.value = _date.value.plusDays(1) }
     fun prevDay() { _date.value = _date.value.minusDays(1) }
 
+    var showGantt by mutableStateOf(false)
+        private set
+
+    fun toggleGantt() {
+        showGantt = !showGantt
+        if (showGantt) clearSelection()
+    }
+
     // action picker state — shown when long-pressing a stay mid-stay
     var pendingActionItem by mutableStateOf<RollItem?>(null)
         private set

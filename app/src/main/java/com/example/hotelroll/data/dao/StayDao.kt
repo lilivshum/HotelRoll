@@ -5,6 +5,7 @@ import java.time.LocalDate
 import com.example.hotelroll.data.model.Stay
 import com.example.hotelroll.data.model.StayStatus
 import com.example.hotelroll.data.dto.StayWithRoomNumber
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
@@ -139,6 +140,13 @@ SELECT EXISTS(
         stayId: Long,
         checkOut: LocalDate
     )
+
+    @Query("""
+        SELECT * FROM stays
+        WHERE checkInDate < :monthEnd
+        AND checkOutDate > :monthStart
+    """)
+    fun getStaysInRange(monthStart: LocalDate, monthEnd: LocalDate): Flow<List<Stay>>
 
     @Query("""
         SELECT DISTINCT roomId FROM stays

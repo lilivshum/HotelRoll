@@ -1,0 +1,27 @@
+package com.example.hotelroll.ui.gantt
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.hotelroll.data.dto.GanttRoomRow
+import com.example.hotelroll.repository.HotelRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
+import java.time.YearMonth
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class GanttViewModel(private val repository: HotelRepository) : ViewModel() {
+
+    private val _month = MutableStateFlow(YearMonth.now())
+    val month: StateFlow<YearMonth> = _month
+
+    val ganttRows: StateFlow<List<GanttRoomRow>> = _month
+        .flatMapLatest { ym -> repository.getGanttRooms(ym) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun nextMonth() { _month.value = _month.value.plusMonths(1) }
+    fun prevMonth() { _month.value = _month.value.minusMonths(1) }
+}
