@@ -86,5 +86,7 @@ dependencies {
     // for random icons idk
     implementation("androidx.compose.material:material-icons-extended")
 
+    // Google Sign-In (for Drive backup auth)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
 }

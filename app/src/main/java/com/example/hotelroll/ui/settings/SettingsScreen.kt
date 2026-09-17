@@ -1,5 +1,7 @@
 package com.example.hotelroll.ui.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +25,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +45,26 @@ fun SettingsScreen(
     val vm: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val isMaster by vm.isMaster.collectAsState()
     val driveState by vm.driveState.collectAsState()
+
+    // Launches the Google account chooser and returns the result to the ViewModel
+    val signInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            vm.onSignInResult(account)
+        } catch (e: ApiException) {
+            vm.onSignInResult(null)
+        }
+    }
+
+    // Collect sign-in intent events emitted by the ViewModel
+    LaunchedEffect(Unit) {
+        vm.signInIntent.collect { intent ->
+            signInLauncher.launch(intent)
+        }
+    }
 
     Scaffold(
         topBar = {

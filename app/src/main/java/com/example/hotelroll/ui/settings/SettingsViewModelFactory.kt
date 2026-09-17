@@ -6,8 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 
 class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val appContext = context.applicationContext
+        val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         @Suppress("UNCHECKED_CAST")
-        return SettingsViewModel(prefs) as T
+        return SettingsViewModel(prefs, appContext) as T
     }
 }
