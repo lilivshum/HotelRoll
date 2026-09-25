@@ -25,13 +25,14 @@ fun GanttTable(
     month: YearMonth,
     scrollState: ScrollState,
     today: LocalDate,
+    zoomLevel: Float = 1f,
     modifier: Modifier = Modifier
 ) {
     val daysInMonth = month.lengthOfMonth()
 
     BoxWithConstraints(modifier = modifier) {
-        // Expand cells to fill available width on wide screens; fall back to min on small ones
-        val cellWidth = maxOf(GANTT_CELL_WIDTH, (maxWidth - GANTT_LABEL_WIDTH) / daysInMonth)
+        // Cell width scales with zoom; never smaller than the stretch-to-fill size
+        val cellWidth = maxOf(GANTT_CELL_WIDTH * zoomLevel, (maxWidth - GANTT_LABEL_WIDTH) / daysInMonth)
 
         Column(modifier = Modifier.fillMaxSize()) {
             // Sticky day-number header

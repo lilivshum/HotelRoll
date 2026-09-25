@@ -23,6 +23,9 @@ import java.time.YearMonth
 
 val GANTT_CELL_WIDTH = 36.dp
 val GANTT_LABEL_WIDTH = 52.dp
+const val GANTT_MIN_ZOOM = 0.5f
+const val GANTT_MAX_ZOOM = 3.0f
+const val GANTT_ZOOM_STEP = 0.2f
 
 @Composable
 fun GanttRow(

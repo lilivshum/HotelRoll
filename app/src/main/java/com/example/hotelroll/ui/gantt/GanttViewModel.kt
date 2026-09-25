@@ -24,4 +24,11 @@ class GanttViewModel(private val repository: HotelRepository) : ViewModel() {
 
     fun nextMonth() { _month.value = _month.value.plusMonths(1) }
     fun prevMonth() { _month.value = _month.value.minusMonths(1) }
+
+    private val _zoomLevel = MutableStateFlow(1f)
+    val zoomLevel: StateFlow<Float> = _zoomLevel
+
+    fun setZoom(zoom: Float) {
+        _zoomLevel.value = zoom.coerceIn(GANTT_MIN_ZOOM, GANTT_MAX_ZOOM)
+    }
 }
