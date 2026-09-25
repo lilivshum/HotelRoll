@@ -112,7 +112,7 @@ class SettingsViewModel(
             val result = syncService.push()
             val ex = result.exceptionOrNull()
             if (ex is UserRecoverableAuthException) {
-                _signInIntent.emit(ex.intent)
+                ex.intent?.let { _signInIntent.emit(it) }
                 return@launch
             }
             refreshConnectedState()
@@ -130,7 +130,7 @@ class SettingsViewModel(
             val result = syncService.pull()
             val ex = result.exceptionOrNull()
             if (ex is UserRecoverableAuthException) {
-                _signInIntent.emit(ex.intent)
+                ex.intent?.let { _signInIntent.emit(it) }
                 return@launch
             }
             refreshConnectedState()
