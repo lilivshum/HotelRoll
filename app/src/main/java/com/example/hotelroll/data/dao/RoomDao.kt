@@ -83,9 +83,12 @@ interface RoomDao {
     @Query("SELECT COUNT(*) FROM rooms")
     suspend fun countRooms(): Int
 
-    @Query("""SELECT tariff FROM rooms  
+    @Query("""SELECT tariff FROM rooms
         WHERE roomId = :id LIMIT 1
         """ )
     suspend fun getRoomTariff(id: Long): Double
+
+    @Query("UPDATE rooms SET status = 'AVAILABLE'")
+    suspend fun resetAllStatuses()
 
 }

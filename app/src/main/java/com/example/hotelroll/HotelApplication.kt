@@ -2,16 +2,19 @@ package com.example.hotelroll
 
 
 import android.app.Application
+import android.content.Context
 import com.example.hotelroll.data.database.HotelDatabase
 import com.example.hotelroll.data.model.Currency
 import com.example.hotelroll.data.model.TariffType
 import com.example.hotelroll.data.seed.DEFAULT_ROOMS
 import com.example.hotelroll.data.seed.DEFAULT_USERS
 import com.example.hotelroll.domain.HotelManager
+import com.example.hotelroll.repository.DriveJsonSyncService
 import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.ui.createStay.TariffTypeSelector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -23,6 +26,8 @@ class HotelApplication : Application() {
     }
 
     val manager = HotelManager()
+
+    private val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // Repository is also SINGLETON per app
     val repository: HotelRepository by lazy {
@@ -38,10 +43,29 @@ class HotelApplication : Application() {
         )
     }
 
+    val syncService: DriveJsonSyncService by lazy {
+        DriveJsonSyncService(
+            appContext = applicationContext,
+            db = database,
+            reservationDao = database.reservationDao(),
+            stayDao = database.stayDao(),
+            roomDao = database.roomDao(),
+            prefs = getSharedPreferences("hotelroll_settings", Context.MODE_PRIVATE),
+            scope = appScope
+        )
+    }
+
     override fun onCreate() {
         super.onCreate()
 
-        CoroutineScope(Dispatchers.IO).launch {
+        // Wire sync — master pushes after every write; slave never calls scheduleSync
+        val isMaster = getSharedPreferences("hotelroll_settings", Context.MODE_PRIVATE)
+            .getBoolean("is_master", false)
+        if (isMaster) {
+            repository.sync = syncService
+        }
+
+        appScope.launch {
             seedDatabase()
         }
     }

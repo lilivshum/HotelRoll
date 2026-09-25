@@ -160,4 +160,13 @@ SELECT EXISTS(
         excludeStayId: Long
     ): List<Long>
 
+    @Query("SELECT * FROM stays")
+    suspend fun getAll(): List<Stay>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(stays: List<Stay>)
+
+    @Query("DELETE FROM stays")
+    suspend fun deleteAll()
+
 }

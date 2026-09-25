@@ -46,6 +46,11 @@ class HotelRepository(
     private val manager: HotelManager,
     context: Context
 ) {
+    // Set by HotelApplication after construction to avoid circular dependency.
+    // Null means sync is disabled (e.g. not signed in, or slave device).
+    var sync: SyncService? = null
+
+    private fun triggerSync() { sync?.scheduleSync() }
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val _activeUserId = MutableStateFlow(prefs.getLong(KEY_ACTIVE_USER_ID, 1L))
     val activeUserId: StateFlow<Long> = _activeUserId.asStateFlow()
@@ -96,7 +101,7 @@ class HotelRepository(
             val resId = reservationDao.insert(reservation)
             logEvent(resId, HistoryEventType.RESERVATION_CREATED)
             resId
-        }
+        }.also { triggerSync() }
     }
 
     // assigned room result class
@@ -175,6 +180,7 @@ class HotelRepository(
 
         stayDao.insert(stay)
         logEvent(reservationId, HistoryEventType.STAY_CREATED, "Room $roomNumber")
+        triggerSync()
 
         return AssignRoomResult.Success(stay.stayId)
     }
@@ -236,6 +242,7 @@ class HotelRepository(
 
     suspend fun updateReservation(reservation: Reservation) {
         reservationDao.update(reservation)
+        triggerSync()
     }
 
     suspend fun deactivateReservation(resId: Long) {
@@ -243,6 +250,7 @@ class HotelRepository(
             reservationDao.deactivate(resId)
             logEvent(resId, HistoryEventType.RESERVATION_CLOSED)
         }
+        triggerSync()
     }
 
     suspend fun deleteReservation(resId: Long) {
@@ -252,6 +260,7 @@ class HotelRepository(
             val res = reservationDao.getById(resId) ?: return@withTransaction
             reservationDao.delete(res)
         }
+        triggerSync()
     }
 
     suspend fun deleteStay(stayId: Long) {
@@ -261,6 +270,7 @@ class HotelRepository(
             logEvent(stay.reservationId, HistoryEventType.STAY_DELETED, roomNumber?.let { "Room $it" })
             stayDao.delete(stay)
         }
+        triggerSync()
     }
 
     suspend fun getStaysPerRoom(
@@ -282,6 +292,7 @@ class HotelRepository(
             val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
             logEvent(stay.reservationId, HistoryEventType.STAY_CONFIRMED, roomNumber?.let { "Room $it" })
         }
+        triggerSync()
     }
 
     // seems useful for like a clicking mechanism where it changes the room availability
@@ -296,11 +307,12 @@ class HotelRepository(
         } else {
             roomDao.updateStatus(room.roomId, RoomStatus.AVAILABLE)
         }
-
+        triggerSync()
     }
 
     suspend fun toggleRoomBlock(roomId: Long) {
         roomDao.toggleBlock(roomId)
+        triggerSync()
     }
 
     // for detail viewing in ui
@@ -343,6 +355,7 @@ class HotelRepository(
         notes: String
     ) {
         stayDao.updateStayNotes(stayId, notes)
+        triggerSync()
     }
 
     suspend fun updateReservationNotes(
@@ -350,6 +363,7 @@ class HotelRepository(
         notes: String
     ) {
         reservationDao.updateReservationNotes(resId, notes)
+        triggerSync()
     }
 
     suspend fun getStaysUi(resId: Long): List<StayUi> {
@@ -397,6 +411,7 @@ class HotelRepository(
                     logEvent(stay.reservationId, HistoryEventType.STAY_EDITED, roomNumber?.let { "Room $it" })
                 }
             }
+            triggerSync()
             StayResult.Success
         }
     }
@@ -467,7 +482,7 @@ class HotelRepository(
             else null
             logEvent(stay.reservationId, HistoryEventType.ROOM_MOVED, note)
             true
-        }
+        }.also { if (it) triggerSync() }
     }
 
     // function that moves stay to another room
@@ -488,7 +503,7 @@ class HotelRepository(
                 "Room $oldRoomNumber → $newRoomNumber" else null
             logEvent(stay.reservationId, HistoryEventType.ROOM_MOVED, note)
             true
-        }
+        }.also { if (it) triggerSync() }
     }
 
 }

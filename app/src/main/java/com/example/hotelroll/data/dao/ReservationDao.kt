@@ -78,4 +78,13 @@ interface ReservationDao {
     """)
     suspend fun getExactReservation(name: String): Reservation?
 
+    @Query("SELECT * FROM reservations")
+    suspend fun getAll(): List<Reservation>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(reservations: List<Reservation>)
+
+    @Query("DELETE FROM reservations")
+    suspend fun deleteAll()
+
 }

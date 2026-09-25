@@ -21,6 +21,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +48,11 @@ fun SettingsScreen(
     val vm: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val isMaster by vm.isMaster.collectAsState()
     val driveState by vm.driveState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        vm.toast.collect { message -> snackbarHostState.showSnackbar(message) }
+    }
 
     // Launches the Google account chooser and returns the result to the ViewModel
     val signInLauncher = rememberLauncherForActivityResult(
@@ -67,6 +75,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },
@@ -198,14 +207,14 @@ fun SettingsScreen(
                     ) {
                         if (isMaster) {
                             Button(
-                                onClick = { vm.backupNow() },
+                                onClick = { vm.manualPush() },
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Text("Back up now")
                             }
                         } else {
                             Button(
-                                onClick = { vm.syncNow() },
+                                onClick = { vm.manualPull() },
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Text("Sync now")

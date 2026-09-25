@@ -1,9 +1,12 @@
 package com.example.hotelroll
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import com.example.hotelroll.ui.navigation.HotelNavGraph
@@ -33,6 +36,20 @@ import com.example.hotelroll.ui.navigation.HotelRoute
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : ComponentActivity() {
+
+    override fun onStart() {
+        super.onStart()
+        // Slave devices pull the latest data from Drive each time the app comes to foreground.
+        // Master devices push after every write — no pull needed.
+        val isMaster = getSharedPreferences("hotelroll_settings", Context.MODE_PRIVATE)
+            .getBoolean("is_master", false)
+        if (!isMaster) {
+            val app = applicationContext as HotelApplication
+            lifecycleScope.launch {
+                app.syncService.pull()  // silent — errors surface via manual sync in Settings
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
