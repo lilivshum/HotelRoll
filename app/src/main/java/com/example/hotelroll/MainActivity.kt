@@ -3,6 +3,7 @@ package com.example.hotelroll
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -51,6 +52,8 @@ class MainActivity : ComponentActivity() {
                     app.seedJob.join()  // ensure local seed completes before overwriting with Drive data
                     app.syncService.pull()  // silent — errors surface via manual sync in Settings
                 }
+            } else {
+                Toast.makeText(this, "Drive sync not set up — go to Settings to sign in", Toast.LENGTH_LONG).show()
             }
         }
     }

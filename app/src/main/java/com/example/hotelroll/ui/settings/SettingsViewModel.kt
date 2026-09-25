@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hotelroll.HotelApplication
+import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -109,10 +110,15 @@ class SettingsViewModel(
         viewModelScope.launch {
             _driveState.value = DriveState.Loading
             val result = syncService.push()
+            val ex = result.exceptionOrNull()
+            if (ex is UserRecoverableAuthException) {
+                _signInIntent.emit(ex.intent)
+                return@launch
+            }
             refreshConnectedState()
             _toast.emit(
                 if (result.isSuccess) "Backup complete"
-                else "Backup failed: ${result.exceptionOrNull()?.message}"
+                else "Backup failed: ${ex?.message}"
             )
         }
     }
@@ -122,10 +128,15 @@ class SettingsViewModel(
         viewModelScope.launch {
             _driveState.value = DriveState.Loading
             val result = syncService.pull()
+            val ex = result.exceptionOrNull()
+            if (ex is UserRecoverableAuthException) {
+                _signInIntent.emit(ex.intent)
+                return@launch
+            }
             refreshConnectedState()
             _toast.emit(
                 if (result.isSuccess) "Sync complete"
-                else "Sync failed: ${result.exceptionOrNull()?.message}"
+                else "Sync failed: ${ex?.message}"
             )
         }
     }
