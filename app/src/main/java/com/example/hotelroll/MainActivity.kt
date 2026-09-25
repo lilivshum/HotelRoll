@@ -9,7 +9,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import com.example.hotelroll.ui.navigation.HotelNavGraph
 import com.example.hotelroll.ui.theme.HotelRollTheme
@@ -84,27 +86,24 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (isTablet) {
-                    Surface(
-                        modifier = Modifier
-                            .width(320.dp)
-                            .fillMaxHeight(),
-                        tonalElevation = 2.dp
-                    ) {
-                        ReservationMenuScreen(
-                            reservationViewModel,
-                            onReservationClick = { resId ->
-                                navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
-                                scope.launch { drawerState.close() }
-                            },
-                            onAddReservationClick = {
-                                scope.launch {
-                                    drawerState.close()
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        Surface(
+                            modifier = Modifier
+                                .width(320.dp)
+                                .fillMaxHeight(),
+                            tonalElevation = 2.dp
+                        ) {
+                            ReservationMenuScreen(
+                                reservationViewModel,
+                                onReservationClick = { resId ->
+                                    navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
+                                },
+                                onAddReservationClick = {
                                     navController.navigate(HotelRoute.CreateRes.createRoute())
-                                }
-                            },
-                            onSettingsClick = { onSettingsClick() }
-                        )
-
+                                },
+                                onSettingsClick = { onSettingsClick() }
+                            )
+                        }
                         HotelNavGraph(
                             onMenuClick = { },
                             navController = navController
