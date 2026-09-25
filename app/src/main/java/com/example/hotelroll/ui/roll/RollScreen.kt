@@ -34,7 +34,7 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                onEmptyClick: (Long, String, String, StayMode, Long?) -> Unit
 ) {
     val viewModel: RollViewModel = viewModel(factory = RollViewModelFactory(app.repository))
-    val ganttViewModel: GanttViewModel = viewModel(factory = GanttViewModelFactory(app.repository))
+    val ganttViewModel: GanttViewModel = viewModel(factory = GanttViewModelFactory(app.repository, app))
     val rollItems by viewModel.roll.collectAsState(initial = emptyList())
     val activeUser by viewModel.activeUser.collectAsState()
     val ganttMonth by ganttViewModel.month.collectAsState()

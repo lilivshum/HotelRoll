@@ -1,7 +1,7 @@
 package com.example.hotelroll.ui.gantt
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -38,7 +38,33 @@ fun GanttScreen(viewModel: GanttViewModel) {
         scrollState.animateScrollTo((targetDay * cellWidthPx).toInt())
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // Width of the scrollable area (excludes the fixed room label column)
+        val scrollViewportPx = with(density) { (maxWidth - GANTT_LABEL_WIDTH).toPx() }
+
+        fun zoomTo(newZoom: Float) {
+            val oldZoom = viewModel.zoomLevel.value
+            val clamped = newZoom.coerceIn(GANTT_MIN_ZOOM, GANTT_MAX_ZOOM)
+            if (clamped == oldZoom) return
+
+            // Use actual cell widths (accounting for stretch-to-fill floor) for the ratio,
+            // not just the raw zoom values — otherwise the formula is wrong on wide screens
+            val baseCellPx = with(density) { GANTT_CELL_WIDTH.toPx() }
+            val stretchFloorPx = scrollViewportPx / month.lengthOfMonth()
+            val oldCellPx = maxOf(baseCellPx * oldZoom, stretchFloorPx)
+            val newCellPx = maxOf(baseCellPx * clamped, stretchFloorPx)
+            val ratio = newCellPx / oldCellPx
+
+            // Keep the visible center on the same day:
+            //   newScroll = (currentScroll + halfViewport) * ratio - halfViewport
+            val halfViewport = scrollViewportPx / 2f
+            val delta = (scrollState.value + halfViewport) * ratio - halfViewport - scrollState.value
+
+            // dispatchRawDelta is synchronous — updates scroll state in the same frame as setZoom
+            scrollState.dispatchRawDelta(delta)
+            viewModel.setZoom(clamped)
+        }
+
         GanttTable(
             rows = rows,
             month = month,
@@ -56,13 +82,13 @@ fun GanttScreen(viewModel: GanttViewModel) {
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             FilledTonalIconButton(
-                onClick = { viewModel.setZoom(zoomLevel + GANTT_ZOOM_STEP) },
+                onClick = { zoomTo(zoomLevel + GANTT_ZOOM_STEP) },
                 enabled = zoomLevel < GANTT_MAX_ZOOM
             ) {
                 Icon(Icons.Default.ZoomIn, contentDescription = "Zoom in")
             }
             FilledTonalIconButton(
-                onClick = { viewModel.setZoom(zoomLevel - GANTT_ZOOM_STEP) },
+                onClick = { zoomTo(zoomLevel - GANTT_ZOOM_STEP) },
                 enabled = zoomLevel > GANTT_MIN_ZOOM
             ) {
                 Icon(Icons.Default.ZoomOut, contentDescription = "Zoom out")

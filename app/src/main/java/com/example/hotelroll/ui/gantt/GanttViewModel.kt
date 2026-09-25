@@ -1,5 +1,6 @@
 package com.example.hotelroll.ui.gantt
 
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hotelroll.data.dto.GanttRoomRow
@@ -12,8 +13,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.time.YearMonth
 
+private const val KEY_ZOOM = "gantt_zoom_level"
+
 @OptIn(ExperimentalCoroutinesApi::class)
-class GanttViewModel(private val repository: HotelRepository) : ViewModel() {
+class GanttViewModel(
+    private val repository: HotelRepository,
+    private val prefs: SharedPreferences
+) : ViewModel() {
 
     private val _month = MutableStateFlow(YearMonth.now())
     val month: StateFlow<YearMonth> = _month
@@ -25,10 +31,14 @@ class GanttViewModel(private val repository: HotelRepository) : ViewModel() {
     fun nextMonth() { _month.value = _month.value.plusMonths(1) }
     fun prevMonth() { _month.value = _month.value.minusMonths(1) }
 
-    private val _zoomLevel = MutableStateFlow(1f)
+    private val _zoomLevel = MutableStateFlow(
+        prefs.getFloat(KEY_ZOOM, 1f).coerceIn(GANTT_MIN_ZOOM, GANTT_MAX_ZOOM)
+    )
     val zoomLevel: StateFlow<Float> = _zoomLevel
 
     fun setZoom(zoom: Float) {
-        _zoomLevel.value = zoom.coerceIn(GANTT_MIN_ZOOM, GANTT_MAX_ZOOM)
+        val clamped = zoom.coerceIn(GANTT_MIN_ZOOM, GANTT_MAX_ZOOM)
+        _zoomLevel.value = clamped
+        prefs.edit().putFloat(KEY_ZOOM, clamped).apply()
     }
 }
