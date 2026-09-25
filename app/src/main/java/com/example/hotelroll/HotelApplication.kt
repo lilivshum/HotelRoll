@@ -14,6 +14,7 @@ import com.example.hotelroll.repository.HotelRepository
 import com.example.hotelroll.ui.createStay.TariffTypeSelector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -28,6 +29,7 @@ class HotelApplication : Application() {
     val manager = HotelManager()
 
     private val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    lateinit var seedJob: Job
 
     // Repository is also SINGLETON per app
     val repository: HotelRepository by lazy {
@@ -65,7 +67,7 @@ class HotelApplication : Application() {
             repository.sync = syncService
         }
 
-        appScope.launch {
+        seedJob = appScope.launch {
             seedDatabase()
         }
     }

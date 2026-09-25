@@ -3,6 +3,7 @@ package com.example.hotelroll
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
@@ -45,8 +46,11 @@ class MainActivity : ComponentActivity() {
             .getBoolean("is_master", false)
         if (!isMaster) {
             val app = applicationContext as HotelApplication
-            lifecycleScope.launch {
-                app.syncService.pull()  // silent — errors surface via manual sync in Settings
+            if (GoogleSignIn.getLastSignedInAccount(app) != null) {
+                lifecycleScope.launch {
+                    app.seedJob.join()  // ensure local seed completes before overwriting with Drive data
+                    app.syncService.pull()  // silent — errors surface via manual sync in Settings
+                }
             }
         }
     }
