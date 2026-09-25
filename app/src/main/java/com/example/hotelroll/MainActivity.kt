@@ -76,70 +76,40 @@ class MainActivity : ComponentActivity() {
                     factory = ReservationViewModelFactory(app.repository)
                 )
 
-                // for screen resize for tablet
-                val windowSizeClass = calculateWindowSizeClass(this)
-                val isTablet = windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
-
                 val onSettingsClick = {
                     scope.launch { drawerState.close() }
                     navController.navigate(HotelRoute.Settings.route)
                 }
 
-                if (isTablet) {
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        Surface(
-                            modifier = Modifier
-                                .width(320.dp)
-                                .fillMaxHeight(),
-                            tonalElevation = 2.dp
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
+                        ModalDrawerSheet(
+                            drawerContainerColor = MaterialTheme.colorScheme.surface
                         ) {
                             ReservationMenuScreen(
-                                reservationViewModel,
+                                viewModel = reservationViewModel,
                                 onReservationClick = { resId ->
                                     navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
+                                    scope.launch { drawerState.close() }
                                 },
                                 onAddReservationClick = {
-                                    navController.navigate(HotelRoute.CreateRes.createRoute())
+                                    scope.launch {
+                                        drawerState.close()
+                                        navController.navigate(HotelRoute.CreateRes.createRoute())
+                                    }
                                 },
                                 onSettingsClick = { onSettingsClick() }
                             )
                         }
-                        HotelNavGraph(
-                            onMenuClick = { },
-                            navController = navController
-                        )
                     }
-                } else {
-                    ModalNavigationDrawer(
-                        drawerState = drawerState,
-                        drawerContent = {
-                            ModalDrawerSheet(
-                                drawerContainerColor = MaterialTheme.colorScheme.surface
-                            ) {
-                                ReservationMenuScreen(
-                                    viewModel = reservationViewModel,
-                                    onReservationClick = { resId ->
-                                        navController.navigate(HotelRoute.ReservationDetail.createRoute(resId))
-                                        scope.launch { drawerState.close() }
-                                    },
-                                    onAddReservationClick = {
-                                        scope.launch {
-                                            drawerState.close()
-                                            navController.navigate(HotelRoute.CreateRes.createRoute())
-                                        }
-                                    },
-                                    onSettingsClick = { onSettingsClick() }
-                                )
-                            }
-                        }
-                    ) {
-                        HotelNavGraph(
-                            onMenuClick = {
-                                scope.launch { drawerState.open() }
-                            },
-                            navController = navController
-                        )
-                    }
+                ) {
+                    HotelNavGraph(
+                        onMenuClick = {
+                            scope.launch { drawerState.open() }
+                        },
+                        navController = navController
+                    )
                 }
 
             }
