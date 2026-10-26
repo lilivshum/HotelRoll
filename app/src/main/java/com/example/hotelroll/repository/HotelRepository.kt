@@ -241,7 +241,11 @@ class HotelRepository(
     }
 
     suspend fun updateReservation(reservation: Reservation) {
+        val old = reservationDao.getById(reservation.id)
         reservationDao.update(reservation)
+        if (old != null && old.resName != reservation.resName) {
+            logEvent(reservation.id, HistoryEventType.RESERVATION_RENAMED, "\"${old.resName}\" → \"${reservation.resName}\"")
+        }
         triggerSync()
     }
 

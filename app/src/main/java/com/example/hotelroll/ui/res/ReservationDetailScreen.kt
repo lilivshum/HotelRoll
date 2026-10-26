@@ -120,7 +120,7 @@ fun ReservationDetailScreen(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-                        } else if (reservation.isActive) {
+                        } else {
                             IconButton(onClick = { onHistoryClick(reservationId) }) {
                                 Icon(
                                     Icons.Default.History,
@@ -128,6 +128,8 @@ fun ReservationDetailScreen(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
+                        }
+                        if (!isEditing && reservation.isActive) {
                             IconButton(onClick = { isEditing = true }) {
                                 Icon(
                                     Icons.Default.Edit,

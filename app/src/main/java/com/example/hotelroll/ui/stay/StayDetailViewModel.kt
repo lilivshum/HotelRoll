@@ -52,6 +52,9 @@ class StayDetailViewModel (
     private var origResName = ""
     val resNameChanged: Boolean get() = resName != origResName
 
+    var reservationId by mutableStateOf<Long?>(null)
+        private set
+
     fun onResNameChange(v: String) { resName = v }
 
     fun saveResName(onDone: () -> Unit = {}) {
@@ -84,6 +87,7 @@ class StayDetailViewModel (
             _stay.value = repository.getStayById(stayId)
             notesFlow.value = _stay.value?.notes.orEmpty()
             _stay.value?.let { stay ->
+                reservationId = stay.reservationId
                 val res = repository.getResById(stay.reservationId)
                 resName = res?.resName ?: ""
                 origResName = resName

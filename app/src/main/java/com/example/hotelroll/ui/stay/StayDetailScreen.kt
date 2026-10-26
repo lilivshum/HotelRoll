@@ -25,6 +25,7 @@ fun StayDetailScreen(
     viewModel: StayDetailViewModel,
     roomNumber: String,
     onBack: () -> Unit = {},
+    onHistoryClick: ((reservationId: Long) -> Unit)? = null,
     onEdit: ((roomId: Long, roomNumber: String, date: String, stayId: Long) -> Unit)? = null,
     onDeleted: (() -> Unit)? = null
 ) {
@@ -50,6 +51,12 @@ fun StayDetailScreen(
             StayDetailsTopBar(
                 title = roomNumber,
                 onBack = onBack,
+                onHistory = run {
+                    val resId = viewModel.reservationId
+                    if (onHistoryClick != null && resId != null) {
+                        { onHistoryClick(resId) }
+                    } else null
+                },
                 onEdit = if (onEdit != null && !isPast) {
                     {
                         stay?.let { s ->

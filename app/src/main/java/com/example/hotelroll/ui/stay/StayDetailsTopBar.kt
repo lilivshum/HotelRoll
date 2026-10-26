@@ -9,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.MaterialTheme
 
 // idk what this is? its experimental?
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 fun StayDetailsTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
+    onHistory: (() -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null
 ) {
@@ -33,6 +35,15 @@ fun StayDetailsTopBar(
             }
         },
         actions = {
+            if (onHistory != null) {
+                IconButton(onClick = onHistory) {
+                    Icon(
+                        Icons.Default.History,
+                        contentDescription = "History",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
             if (onDelete != null) {
                 IconButton(onClick = onDelete) {
                     Icon(

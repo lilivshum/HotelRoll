@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 
 enum class HistoryEventType {
     RESERVATION_CREATED,
+    RESERVATION_RENAMED,
     STAY_CREATED,
     STAY_CONFIRMED,
     STAY_EDITED,

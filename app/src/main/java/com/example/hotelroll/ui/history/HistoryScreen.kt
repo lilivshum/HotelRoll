@@ -138,7 +138,8 @@ private fun HistoryEntryRow(entry: HistoryEntry) {
 }
 
 private fun HistoryEventType.label(): String = when (this) {
-    HistoryEventType.RESERVATION_CREATED -> "Reservation created"
+    HistoryEventType.RESERVATION_CREATED  -> "Reservation created"
+    HistoryEventType.RESERVATION_RENAMED  -> "Reservation renamed"
     HistoryEventType.STAY_CREATED        -> "Stay created"
     HistoryEventType.STAY_CONFIRMED      -> "Stay confirmed"
     HistoryEventType.STAY_EDITED         -> "Stay edited"
@@ -148,7 +149,8 @@ private fun HistoryEventType.label(): String = when (this) {
 }
 
 private fun HistoryEventType.icon(): ImageVector = when (this) {
-    HistoryEventType.RESERVATION_CREATED -> Icons.Default.Add
+    HistoryEventType.RESERVATION_CREATED  -> Icons.Default.Add
+    HistoryEventType.RESERVATION_RENAMED  -> Icons.Default.Edit
     HistoryEventType.STAY_CREATED        -> Icons.Default.Add
     HistoryEventType.STAY_CONFIRMED      -> Icons.Default.Check
     HistoryEventType.STAY_EDITED         -> Icons.Default.Edit
