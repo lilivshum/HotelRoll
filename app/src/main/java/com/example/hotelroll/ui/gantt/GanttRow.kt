@@ -107,7 +107,7 @@ fun GanttRow(
                             text = row.stayDisplayNames[stay!!.stayId] ?: "",
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                             maxLines = 1,
-                            overflow = TextOverflow.Clip,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(start = 2.dp),
                             color = if (stay.status == StayStatus.CONFIRMED)
                                 MaterialTheme.colorScheme.onPrimary

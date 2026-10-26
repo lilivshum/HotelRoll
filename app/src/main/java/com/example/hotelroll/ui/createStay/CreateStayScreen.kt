@@ -197,6 +197,7 @@ fun CreateStayScreen(
     val roomNumber = viewModel.roomNumber
     val mode = viewModel.stayMode // observation mode
     val editNotes by viewModel.editNotes.collectAsState()
+    val reservationNameState by viewModel.reservationName.collectAsState()
 
     // Local string state for numeric fields — avoids snap-back when deleting digits
     var adultsText by remember(viewModel.peopleInRoom) { mutableStateOf(viewModel.peopleInRoom.toString()) }
@@ -304,9 +305,17 @@ fun CreateStayScreen(
         ) {
             if (mode == StayMode.CREATE && !viewModel.reservationIsLocked) {
                 ReservationField(viewModel)
+            } else if (mode == StayMode.EDIT) {
+                OutlinedTextField(
+                    value = reservationNameState,
+                    onValueChange = viewModel::onNameChange,
+                    label = { Text("Reservation") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
             } else {
                 OutlinedTextField(
-                    value = viewModel.reservationName.value,
+                    value = reservationNameState,
                     onValueChange = {},
                     readOnly = true,
                     enabled = false,
@@ -314,13 +323,6 @@ fun CreateStayScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-
-            OutlinedTextField(
-                value = viewModel.stayName ?: "",
-                onValueChange = viewModel::onStayNameChange,
-                label = { Text("Guest Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
 
             OutlinedTextField(
                 value = adultsText,

@@ -50,7 +50,7 @@ interface RoomDao {
     @Query("""
         SELECT r.roomId AS roomId,
                r.roomNumber AS roomNumber,
-               COALESCE(s.stayName, res.resName) AS reservationName,
+               res.resName AS reservationName,
                s.peopleInRoom AS peopleInRoom,
                s.kidsInRoom AS kidsInRoom,
                COALESCE(s.tariff, r.tariff) AS tariff,

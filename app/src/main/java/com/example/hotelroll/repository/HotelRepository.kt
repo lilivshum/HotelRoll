@@ -443,12 +443,14 @@ class HotelRepository(
     fun getGanttRooms(yearMonth: YearMonth): Flow<List<GanttRoomRow>> {
         val start = yearMonth.atDay(1)
         val end = yearMonth.atEndOfMonth().plusDays(1)
-        return stayDao.getStaysInRange(start, end).map { stays ->
+        return combine(
+            stayDao.getStaysInRange(start, end),
+            reservationDao.getAllReservationsSnapshot()
+        ) { stays, allReservations ->
             val allRooms = roomDao.getAll()
-            val resNames = stays.map { it.reservationId }.toSet()
-                .associateWith { id -> reservationDao.getById(id)?.resName ?: "" }
+            val resNamesMap = allReservations.associateBy({ it.id }, { it.resName })
             val displayNames = stays.associate { stay ->
-                stay.stayId to (stay.stayName?.takeIf { it.isNotBlank() } ?: resNames[stay.reservationId] ?: "")
+                stay.stayId to (resNamesMap[stay.reservationId] ?: "")
             }
             val staysByRoom = stays.groupBy { it.roomId }
             allRooms.map { room ->
@@ -459,6 +461,51 @@ class HotelRepository(
                     stayDisplayNames = displayNames,
                     isBlocked = room.status == RoomStatus.BLOCKED
                 )
+            }
+        }
+    }
+
+    // One-time migration: promote stayName → resName.
+    // Single-stay reservation: rename the reservation in place (stayName if set, else keep resName).
+    // Multi-stay reservation: first stay keeps the original reservation (renamed to its stayName if set);
+    //   every other stay gets its own new reservation — named stays use stayName, unnamed use the original resName.
+    suspend fun migrateStayNamesToReservations() {
+        val allStays = stayDao.getAll()
+        val staysByRes = allStays.groupBy { it.reservationId }
+
+        staysByRes.forEach { (resId, stays) ->
+            val res = reservationDao.getById(resId) ?: return@forEach
+
+            if (stays.size == 1) {
+                val stay = stays.first()
+                if (!stay.stayName.isNullOrBlank()) {
+                    reservationDao.update(res.copy(resName = stay.stayName!!))
+                    stayDao.update(stay.copy(stayName = null))
+                }
+            } else {
+                // First stay keeps the original reservation
+                val first = stays.first()
+                val firstName = first.stayName?.takeIf { it.isNotBlank() } ?: res.resName
+                reservationDao.update(res.copy(resName = firstName))
+                stayDao.update(first.copy(stayName = null))
+
+                // Every other stay gets its own new reservation
+                stays.drop(1).forEach { stay ->
+                    val nights = java.time.temporal.ChronoUnit.DAYS
+                        .between(stay.checkInDate, stay.checkOutDate).toInt()
+                    val displayName = stay.stayName?.takeIf { it.isNotBlank() } ?: res.resName
+                    val newResId = reservationDao.insert(
+                        Reservation(
+                            resName = displayName,
+                            checkInDate = stay.checkInDate,
+                            nights = nights,
+                            noGuests = stay.peopleInRoom,
+                            noKids = stay.kidsInRoom,
+                            isActive = true
+                        )
+                    )
+                    stayDao.update(stay.copy(reservationId = newResId, stayName = null))
+                }
             }
         }
     }

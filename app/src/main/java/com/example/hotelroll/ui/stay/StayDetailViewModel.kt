@@ -1,6 +1,9 @@
 package com.example.hotelroll.ui.stay
 
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.example.hotelroll.data.model.User
@@ -44,6 +47,23 @@ class StayDetailViewModel (
     private val notesFlow = MutableStateFlow("")
     val notes = notesFlow.asStateFlow()
 
+    var resName by mutableStateOf("")
+        private set
+    private var origResName = ""
+    val resNameChanged: Boolean get() = resName != origResName
+
+    fun onResNameChange(v: String) { resName = v }
+
+    fun saveResName(onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            val stay = _stay.value ?: return@launch
+            val res = repository.getResById(stay.reservationId) ?: return@launch
+            repository.updateReservation(res.copy(resName = resName))
+            origResName = resName
+            onDone()
+        }
+    }
+
     init {
         loadStay()
 
@@ -63,6 +83,11 @@ class StayDetailViewModel (
         viewModelScope.launch {
             _stay.value = repository.getStayById(stayId)
             notesFlow.value = _stay.value?.notes.orEmpty()
+            _stay.value?.let { stay ->
+                val res = repository.getResById(stay.reservationId)
+                resName = res?.resName ?: ""
+                origResName = resName
+            }
         }
     }
 

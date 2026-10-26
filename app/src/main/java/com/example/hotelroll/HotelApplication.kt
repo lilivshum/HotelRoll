@@ -69,7 +69,15 @@ class HotelApplication : Application() {
 
         seedJob = appScope.launch {
             seedDatabase()
+            migrateStayNamesOnce()
         }
+    }
+
+    private suspend fun migrateStayNamesOnce() {
+        val prefs = getSharedPreferences("hotelroll_settings", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("stay_name_migration_done", false)) return
+        repository.migrateStayNamesToReservations()
+        prefs.edit().putBoolean("stay_name_migration_done", true).apply()
     }
 
     private suspend fun seedDatabase() {

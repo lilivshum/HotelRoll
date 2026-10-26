@@ -92,7 +92,6 @@ fun HotelNavGraph(
                 viewModel = viewModel,
                 onBack = { navController.navigateUp() },
                 roomNumber = backStackEntry.arguments!!.getString("roomNumber") ?: "Room",
-                reservationName = backStackEntry.arguments!!.getString("reservationName") ?: "",
                 onEdit = { roomId, roomNumber, date, stayId ->
                     navController.navigate(
                         HotelRoute.CreateStay.createRoute(roomId, roomNumber, date, StayMode.EDIT, stayId)

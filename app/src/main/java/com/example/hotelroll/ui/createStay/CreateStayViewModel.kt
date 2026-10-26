@@ -87,9 +87,6 @@ class CreateStayViewModel(
     var tariffType by mutableStateOf(TariffType.NET)
         private set
 
-    var stayName by mutableStateOf<String?>(null)
-        private set
-
     var checkOutDate by mutableStateOf(checkInDate.plusDays(1))
         private set
 
@@ -134,7 +131,7 @@ class CreateStayViewModel(
     fun onEditNotesChange(v: String) { _editNotesFlow.value = v }
 
     // originals stored after hydrate — used to detect unsaved changes
-    private var origStayName: String? = null
+    private var origResName: String = ""
     private var origPeopleInRoom: Int = 1
     private var origKidsInRoom: Int = 0
     private var origCheckInDate: LocalDate = date
@@ -146,7 +143,7 @@ class CreateStayViewModel(
 
     val hasUnsavedChanges: Boolean
         get() = stayMode == StayMode.EDIT && (
-            stayName != origStayName ||
+            reservationName.value != origResName ||
             peopleInRoom != origPeopleInRoom ||
             kidsInRoom != origKidsInRoom ||
             checkInDate != origCheckInDate ||
@@ -168,6 +165,7 @@ class CreateStayViewModel(
                 }
                 val res = repository.getResById(stay.reservationId)
                 _reservationName.value = res!!.resName // assumes reservation is non-null
+                origResName = res.resName
                 hydrate(stay)
             }
 
@@ -195,7 +193,6 @@ class CreateStayViewModel(
 
     // prefills the values with the existing stay
     private fun hydrate(stay: Stay) {
-            stayName = stay.stayName
             peopleInRoom = stay.peopleInRoom
             kidsInRoom = stay.kidsInRoom
             checkInDate = stay.checkInDate
@@ -212,7 +209,6 @@ class CreateStayViewModel(
             _editNotesFlow.value = stay.notes.orEmpty()
 
             // snapshot originals for unsaved-changes detection
-            origStayName = stay.stayName
             origPeopleInRoom = stay.peopleInRoom
             origKidsInRoom = stay.kidsInRoom
             origCheckInDate = stay.checkInDate
@@ -250,8 +246,6 @@ class CreateStayViewModel(
         }
         nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate).toInt()
     }
-
-    fun onStayNameChange(v: String?){stayName = v}
 
     fun onStayStatusChange(v: StayStatus){stayStatus = v}
 
@@ -366,7 +360,7 @@ class CreateStayViewModel(
                                     roomNumber,
                                     tariff,
                                     tariffType,
-                                    stayName,
+                                    null,
                                     currency
                                 )
                             } else {
@@ -380,7 +374,7 @@ class CreateStayViewModel(
                                     tariff,
                                     tariffType,
                                     notes,
-                                    stayName,
+                                    null,
                                     currency
                                 )
                             }
@@ -413,13 +407,20 @@ class CreateStayViewModel(
                             tariff = tariff,
                             tariffType = tariffType,
                             notes = notes,
-                            stayName = stayName,
+                            stayName = null,
                             status = stayStatus,
                             currency = currency
                         )
                         when (repository.updateStay(stay)){
 
                             is HotelRepository.StayResult.Success -> {
+                                val newName = reservationName.value.trim()
+                                if (newName != origResName) {
+                                    repository.getResById(resId)?.let { res ->
+                                        repository.updateReservation(res.copy(resName = newName))
+                                    }
+                                    origResName = newName
+                                }
                                 onSuccess()
                             }
 

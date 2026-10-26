@@ -24,7 +24,6 @@ import com.example.hotelroll.ui.utilities.NotesEditor
 fun StayDetailScreen(
     viewModel: StayDetailViewModel,
     roomNumber: String,
-    reservationName: String,
     onBack: () -> Unit = {},
     onEdit: ((roomId: Long, roomNumber: String, date: String, stayId: Long) -> Unit)? = null,
     onDeleted: (() -> Unit)? = null
@@ -73,7 +72,10 @@ fun StayDetailScreen(
                 StayDetailContent(
                     stay = it,
                     modifier = Modifier.padding(padding),
-                    reservationName
+                    resName = viewModel.resName,
+                    resNameChanged = viewModel.resNameChanged,
+                    onResNameChange = viewModel::onResNameChange,
+                    onResSave = viewModel::saveResName
                 )
                 NotesEditor(
                     notes = notes,
