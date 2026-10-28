@@ -1,6 +1,7 @@
 package com.example.hotelroll.ui.roll
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,6 +29,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DateHeader(
     date: LocalDate,
@@ -79,7 +81,10 @@ fun DateHeader(
             Text(
                 text = date.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.getDefault())),
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { showDatePicker = true }
+                modifier = Modifier.combinedClickable(
+                    onClick = { showDatePicker = true },
+                    onDoubleClick = { viewModel.goToToday() }
+                )
             )
             IconButton(onClick = onNext) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next day")

@@ -44,6 +44,7 @@ class RollViewModel(
 
     fun nextDay() { _date.value = _date.value.plusDays(1) }
     fun prevDay() { _date.value = _date.value.minusDays(1) }
+    fun goToToday() { _date.value = LocalDate.now() }
 
     var showGantt by mutableStateOf(false)
         private set

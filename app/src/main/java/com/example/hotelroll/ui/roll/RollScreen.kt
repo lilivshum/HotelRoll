@@ -97,8 +97,6 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                rollItems.forEach { println(it) }
-
                 // Table with horizontal scroll + vertical scrolling inside
                 RollTable(
                     rollItems = rollItems,
