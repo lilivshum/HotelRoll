@@ -160,6 +160,9 @@ SELECT EXISTS(
         excludeStayId: Long
     ): List<Long>
 
+    @Query("UPDATE stays SET status = 'ROOM_READY' WHERE roomId = :roomId AND status = 'CHECKED_OUT'")
+    suspend fun markCheckedOutStaysAsReady(roomId: Long)
+
     @Query("SELECT * FROM stays")
     suspend fun getAll(): List<Stay>
 

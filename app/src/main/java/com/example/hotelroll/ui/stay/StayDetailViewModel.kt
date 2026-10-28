@@ -14,6 +14,7 @@ import com.example.hotelroll.HotelApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
+import com.example.hotelroll.data.model.RoomStatus
 import com.example.hotelroll.data.model.Stay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -43,6 +44,9 @@ class StayDetailViewModel (
 
     private val _stay = MutableStateFlow<Stay?>(null)
     val stay: StateFlow<Stay?> = _stay
+
+    private val _roomStatus = MutableStateFlow<RoomStatus?>(null)
+    val roomStatus: StateFlow<RoomStatus?> = _roomStatus
 
     private val notesFlow = MutableStateFlow("")
     val notes = notesFlow.asStateFlow()
@@ -91,6 +95,7 @@ class StayDetailViewModel (
                 val res = repository.getResById(stay.reservationId)
                 resName = res?.resName ?: ""
                 origResName = resName
+                _roomStatus.value = repository.getRoomStatus(stay.roomId)
             }
         }
     }
@@ -105,5 +110,10 @@ class StayDetailViewModel (
             onDone()
         }
     }
+
+    fun checkIn() { viewModelScope.launch { _stay.value?.let { repository.checkIn(it.stayId); loadStay() } } }
+    fun undoCheckIn() { viewModelScope.launch { _stay.value?.let { repository.undoCheckIn(it.stayId); loadStay() } } }
+    fun checkOut() { viewModelScope.launch { _stay.value?.let { repository.checkOut(it.stayId); loadStay() } } }
+    fun markRoomReady() { viewModelScope.launch { _stay.value?.let { repository.markRoomReady(it.stayId); loadStay() } } }
 
 }

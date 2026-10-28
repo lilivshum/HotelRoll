@@ -7,9 +7,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.HowToReg
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.MaterialTheme
 
 // idk what this is? its experimental?
@@ -18,9 +19,11 @@ import androidx.compose.material3.MaterialTheme
 fun StayDetailsTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
-    onHistory: (() -> Unit)? = null,
+    onCheckIn: (() -> Unit)? = null,
+    onUndoCheckIn: (() -> Unit)? = null,
+    onCheckOut: (() -> Unit)? = null,
+    onRoomReady: (() -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
-    onDelete: (() -> Unit)? = null
 ) {
     CenterAlignedTopAppBar(
         title = { Text(title) },
@@ -35,22 +38,28 @@ fun StayDetailsTopBar(
             }
         },
         actions = {
-            if (onHistory != null) {
-                IconButton(onClick = onHistory) {
-                    Icon(
-                        Icons.Default.History,
-                        contentDescription = "History",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+            if (onCheckIn != null) {
+                IconButton(onClick = onCheckIn) {
+                    Icon(Icons.Default.HowToReg, contentDescription = "Check in",
+                        tint = MaterialTheme.colorScheme.primary)
                 }
             }
-            if (onDelete != null) {
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+            if (onUndoCheckIn != null) {
+                IconButton(onClick = onUndoCheckIn) {
+                    Icon(Icons.Default.HowToReg, contentDescription = "Undo check-in",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            if (onCheckOut != null) {
+                IconButton(onClick = onCheckOut) {
+                    Icon(Icons.Default.Logout, contentDescription = "Check out",
+                        tint = MaterialTheme.colorScheme.primary)
+                }
+            }
+            if (onRoomReady != null) {
+                IconButton(onClick = onRoomReady) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = "Room ready",
+                        tint = MaterialTheme.colorScheme.primary)
                 }
             }
             if (onEdit != null) {

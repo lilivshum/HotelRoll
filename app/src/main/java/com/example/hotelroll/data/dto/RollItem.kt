@@ -21,4 +21,5 @@ class RollItem (
     val checkInDate: LocalDate?,
     val checkOutDate: LocalDate?,
     val roomStatus: RoomStatus?,
+    val incomingResName: String?,   // set when an incoming back-to-back stay exists on this date
 )

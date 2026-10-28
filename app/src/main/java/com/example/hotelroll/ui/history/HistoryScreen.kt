@@ -13,9 +13,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.HowToReg
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -146,6 +150,10 @@ private fun HistoryEventType.label(): String = when (this) {
     HistoryEventType.ROOM_MOVED          -> "Room moved"
     HistoryEventType.STAY_DELETED        -> "Stay deleted"
     HistoryEventType.RESERVATION_CLOSED  -> "Reservation closed"
+    HistoryEventType.STAY_CHECKED_IN     -> "Guest checked in"
+    HistoryEventType.STAY_CHECK_IN_UNDONE -> "Check-in undone"
+    HistoryEventType.STAY_CHECKED_OUT    -> "Guest checked out"
+    HistoryEventType.ROOM_MARKED_READY   -> "Room marked ready"
 }
 
 private fun HistoryEventType.icon(): ImageVector = when (this) {
@@ -157,12 +165,19 @@ private fun HistoryEventType.icon(): ImageVector = when (this) {
     HistoryEventType.ROOM_MOVED          -> Icons.AutoMirrored.Filled.ArrowForward
     HistoryEventType.STAY_DELETED        -> Icons.Default.Delete
     HistoryEventType.RESERVATION_CLOSED  -> Icons.Default.Close
+    HistoryEventType.STAY_CHECKED_IN     -> Icons.Default.HowToReg
+    HistoryEventType.STAY_CHECK_IN_UNDONE -> Icons.Default.PersonOff
+    HistoryEventType.STAY_CHECKED_OUT    -> Icons.Default.Logout
+    HistoryEventType.ROOM_MARKED_READY   -> Icons.Default.CheckCircle
 }
 
 @Composable
 private fun HistoryEventType.tint() = when (this) {
     HistoryEventType.STAY_DELETED,
     HistoryEventType.RESERVATION_CLOSED -> MaterialTheme.colorScheme.error
-    HistoryEventType.STAY_CONFIRMED     -> MaterialTheme.colorScheme.primary
+    HistoryEventType.STAY_CONFIRMED,
+    HistoryEventType.STAY_CHECKED_IN,
+    HistoryEventType.ROOM_MARKED_READY  -> MaterialTheme.colorScheme.primary
+    HistoryEventType.STAY_CHECKED_OUT   -> MaterialTheme.colorScheme.error
     else                                -> MaterialTheme.colorScheme.onSurfaceVariant
 }

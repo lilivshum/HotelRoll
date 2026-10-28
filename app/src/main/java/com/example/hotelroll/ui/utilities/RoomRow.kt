@@ -45,11 +45,17 @@ fun RoomRow(
     val isDropTarget = selectedItem != null && !isSource && item.roomId in viewModel.validTargetRoomIds
     val isBlocked = item.roomStatus == RoomStatus.BLOCKED
 
+    val isCheckoutDay = item.checkOutDate == date
     val backgroundColor = when {
         isBlocked -> Color(0xFFFF9800).copy(alpha = 0.22f)
         isDropTarget -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
         isSource -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        item.stayStatus == StayStatus.CONFIRMED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+        item.roomStatus == RoomStatus.DIRTY ->
+            MaterialTheme.colorScheme.error.copy(alpha = 0.12f)
+        isCheckoutDay && item.stayStatus != null ->
+            Color(0xFFFF9800).copy(alpha = 0.18f)
+        item.stayStatus == StayStatus.CONFIRMED ->
+            Color(0xFF4CAF50).copy(alpha = 0.15f)
         else -> Color.Transparent
     }
 
@@ -88,10 +94,8 @@ fun RoomRow(
                         // in move mode but not a valid target — block all navigation
                         selectedItem != null -> { }
                         // normal navigation when nothing is selected
-                        item.stayId != null && item.stayStatus == StayStatus.CONFIRMED ->
-                            onStayClick(item.stayId, item.roomNumber, item.reservationName ?: "")
                         item.stayId != null ->
-                            onEmptyClick(item.roomId, item.roomNumber, date.toString(), StayMode.EDIT, item.stayId)
+                            onStayClick(item.stayId, item.roomNumber, item.reservationName ?: "")
                         else ->
                             onEmptyClick(item.roomId, item.roomNumber, date.toString(), StayMode.CREATE, null)
                     }

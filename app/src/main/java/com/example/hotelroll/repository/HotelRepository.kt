@@ -299,6 +299,50 @@ class HotelRepository(
         triggerSync()
     }
 
+    suspend fun checkIn(stayId: Long) {
+        db.withTransaction {
+            val stay = stayDao.getById(stayId) ?: throw IllegalStateException("Stay not found")
+            stayDao.updateStatus(stayId, StayStatus.CONFIRMED)
+            val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            logEvent(stay.reservationId, HistoryEventType.STAY_CHECKED_IN, roomNumber?.let { "Room $it" })
+        }
+        triggerSync()
+    }
+
+    suspend fun undoCheckIn(stayId: Long) {
+        db.withTransaction {
+            val stay = stayDao.getById(stayId) ?: throw IllegalStateException("Stay not found")
+            stayDao.updateStatus(stayId, StayStatus.PENDING)
+            val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            logEvent(stay.reservationId, HistoryEventType.STAY_CHECK_IN_UNDONE, roomNumber?.let { "Room $it" })
+        }
+        triggerSync()
+    }
+
+    suspend fun checkOut(stayId: Long) {
+        db.withTransaction {
+            val stay = stayDao.getById(stayId) ?: throw IllegalStateException("Stay not found")
+            stayDao.updateStatus(stayId, StayStatus.CHECKED_OUT)
+            roomDao.updateStatus(stay.roomId, RoomStatus.DIRTY)
+            val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            logEvent(stay.reservationId, HistoryEventType.STAY_CHECKED_OUT, roomNumber?.let { "Room $it" })
+        }
+        triggerSync()
+    }
+
+    suspend fun markRoomReady(stayId: Long) {
+        db.withTransaction {
+            val stay = stayDao.getById(stayId) ?: throw IllegalStateException("Stay not found")
+            stayDao.markCheckedOutStaysAsReady(stay.roomId)
+            roomDao.updateStatus(stay.roomId, RoomStatus.AVAILABLE)
+            val roomNumber = roomDao.getById(stay.roomId)?.roomNumber
+            logEvent(stay.reservationId, HistoryEventType.ROOM_MARKED_READY, roomNumber?.let { "Room $it" })
+        }
+        triggerSync()
+    }
+
+    suspend fun getRoomStatus(roomId: Long): RoomStatus? = roomDao.getById(roomId)?.status
+
     // seems useful for like a clicking mechanism where it changes the room availability
     suspend fun switchRoomAvailability(
         roomId: Long

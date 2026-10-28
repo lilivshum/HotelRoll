@@ -60,12 +60,28 @@ interface RoomDao {
                s.currency AS currency,
                s.checkInDate AS checkInDate,
                s.checkOutDate AS checkOutDate,
-               r.status AS roomStatus
+               r.status AS roomStatus,
+               incoming_res.resName AS incomingResName
         FROM rooms r
-        LEFT JOIN stays s ON s.roomId = r.roomId
-            AND :date >= s.checkInDate
-            AND :date < s.checkOutDate
+        LEFT JOIN stays s ON s.stayId = (
+            SELECT s2.stayId FROM stays s2
+            WHERE s2.roomId = r.roomId
+            AND (
+                (:date >= s2.checkInDate AND :date < s2.checkOutDate)
+                OR (:date = s2.checkOutDate AND s2.status NOT IN ('ROOM_READY'))
+            )
+            ORDER BY CASE
+                WHEN s2.checkOutDate = :date AND s2.status NOT IN ('ROOM_READY', 'CHECKED_OUT') THEN 0
+                WHEN s2.checkOutDate > :date THEN 1
+                ELSE 2
+            END ASC
+            LIMIT 1
+        )
         LEFT JOIN reservations res ON res.id = s.reservationId
+        LEFT JOIN stays incoming ON incoming.roomId = r.roomId
+            AND incoming.checkInDate = :date
+            AND (s.stayId IS NULL OR incoming.stayId != s.stayId)
+        LEFT JOIN reservations incoming_res ON incoming_res.id = incoming.reservationId
         ORDER BY r.roomNumber
     """)
     fun getRoll(date: LocalDate): Flow<List<RollItem>>

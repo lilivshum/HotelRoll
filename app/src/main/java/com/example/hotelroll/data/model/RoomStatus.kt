@@ -6,4 +6,5 @@ enum class RoomStatus {
     AVAILABLE,
     UNAVAILABLE,
     BLOCKED,
+    DIRTY,
 }

@@ -21,21 +21,23 @@ fun StayCard(
 ) {
     val isSelected = viewModel.selectedItem?.stayId == item.stayId
 
+    val displayName = when {
+        item.incomingResName != null -> "${item.reservationName} → ${item.incomingResName}"
+        else -> item.reservationName ?: ""
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(if (isSelected) 8.dp else 2.dp),
+        elevation = CardDefaults.cardElevation(0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected)
-                MaterialTheme.colorScheme.primaryContainer
-            else
-                MaterialTheme.colorScheme.surfaceVariant
+            containerColor = androidx.compose.ui.graphics.Color.Transparent
         )
     ) {
         Text(
-            text = item.reservationName ?: "",
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            text = displayName,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
             style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface
             )
         )
     }

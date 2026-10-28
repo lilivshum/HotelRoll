@@ -59,6 +59,12 @@ fun StayDetailContent(
         StayDetailsInfoRow("Check-in", stay.checkInDate.toString())
         StayDetailsInfoRow("Check-out", stay.checkOutDate.toString())
         StayDetailsInfoRow("Rate", rate_string)
-        StayDetailsInfoRow("Status", stay.status.name)
+        StayDetailsInfoRow("Status", when (stay.status) {
+            com.example.hotelroll.data.model.StayStatus.PENDING          -> "Pending"
+            com.example.hotelroll.data.model.StayStatus.CONFIRMED        -> "Checked In"
+            com.example.hotelroll.data.model.StayStatus.PENDING_CHECKOUT -> "Pending Checkout"
+            com.example.hotelroll.data.model.StayStatus.CHECKED_OUT      -> "Checked Out"
+            com.example.hotelroll.data.model.StayStatus.ROOM_READY       -> "Room Ready"
+        })
     }
 }
