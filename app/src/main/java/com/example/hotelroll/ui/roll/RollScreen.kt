@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import com.example.hotelroll.ui.utilities.ConfirmActionDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,6 +40,11 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
     val activeUser by viewModel.activeUser.collectAsState()
     val ganttMonth by ganttViewModel.month.collectAsState()
 
+    val isWideScreen = LocalConfiguration.current.screenWidthDp >= 600
+    val occupiedRooms = rollItems.count { it.stayId != null }
+    val totalAdults = rollItems.fold(0) { acc, item -> acc + (item.peopleInRoom ?: 0) }
+    val totalKids = rollItems.fold(0) { acc, item -> acc + (item.kidsInRoom ?: 0) }
+
     // Scaffold is optional, but useful for padding/top bars
     Scaffold { paddingValues ->
         val date = viewModel.date.collectAsState().value
@@ -55,7 +61,11 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                 onToggleView = viewModel::toggleGantt,
                 ganttMonth = ganttMonth,
                 onPrevMonth = ganttViewModel::prevMonth,
-                onNextMonth = ganttViewModel::nextMonth
+                onNextMonth = ganttViewModel::nextMonth,
+                showStats = isWideScreen,
+                occupiedRooms = occupiedRooms,
+                totalAdults = totalAdults,
+                totalKids = totalKids
             )
 
             if (viewModel.showGantt) {
@@ -90,7 +100,17 @@ fun RollScreen(onStayClick: (Long, String, String) -> Unit,
                 rollItems.forEach { println(it) }
 
                 // Table with horizontal scroll + vertical scrolling inside
-                RollTable(rollItems = rollItems, onStayClick, onEmptyClick, date, viewModel)
+                RollTable(
+                    rollItems = rollItems,
+                    onStayClick = onStayClick,
+                    onEmptyClick = onEmptyClick,
+                    date = date,
+                    viewModel = viewModel,
+                    showFooterStats = !isWideScreen,
+                    occupiedRooms = occupiedRooms,
+                    totalAdults = totalAdults,
+                    totalKids = totalKids
+                )
             }
         }
     }

@@ -19,7 +19,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.hotelroll.ui.utilities.AppDatePickerDialog
 import java.time.LocalDate
 import java.time.YearMonth
@@ -37,7 +39,11 @@ fun DateHeader(
     onToggleView: () -> Unit,
     ganttMonth: YearMonth,
     onPrevMonth: () -> Unit,
-    onNextMonth: () -> Unit
+    onNextMonth: () -> Unit,
+    showStats: Boolean = false,
+    occupiedRooms: Int = 0,
+    totalAdults: Int = 0,
+    totalKids: Int = 0
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -80,14 +86,33 @@ fun DateHeader(
             }
         }
 
-        IconButton(
-            onClick = onToggleView,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = if (isGanttView) Icons.AutoMirrored.Filled.List else Icons.Default.DateRange,
-                contentDescription = if (isGanttView) "Switch to roll view" else "Switch to calendar view"
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (showStats && !isGanttView) {
+                val pax = if (totalKids > 0) "$totalAdults+$totalKids" else "$totalAdults"
+                Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                    Text(
+                        text = "Rooms occupied: $occupiedRooms",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End
+                    )
+                    Text(
+                        text = "People: $pax",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End
+                    )
+                }
+            }
+            IconButton(
+                onClick = onToggleView,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = if (isGanttView) Icons.AutoMirrored.Filled.List else Icons.Default.DateRange,
+                    contentDescription = if (isGanttView) "Switch to roll view" else "Switch to calendar view"
+                )
+            }
         }
     }
 
